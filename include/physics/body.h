@@ -20,34 +20,19 @@ private:
     struct State {
         // Primary
         glm::vec3 x;
-        glm::vec3 p;
-
-        // Secondary
         glm::vec3 v;
-
-        // Constant
-        float mass;
-        float invMass;
-
-        State()
-            : mass(1.0f),
-              invMass(1.0f)
-        {
-        }
-
-        void recalculate() {
-            v = p * invMass;
-        }
     };
 
     struct Derivative {
-        glm::vec3 v;
-        glm::vec3 f;
+        glm::vec3 dx;
+        glm::vec3 dv;
     };
 
     State     state;
     glm::vec3 force;
     bool      fixed;
+    float     mass;
+    float     invMass;
 
     Derivative evaluate(
         State initial,

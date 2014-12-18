@@ -10,7 +10,9 @@
 namespace Physics {
 
 Body::Body()
-    : fixed(false)
+    : fixed(false),
+      mass(1.0f),
+      invMass(1.0f)
 {
 }
 
@@ -26,7 +28,7 @@ glm::vec3 Body::getVelocity() {
 }
 
 float Body::getMass() {
-    return state.mass;
+    return mass;
 }
 
 bool Body::getFixed() {
@@ -50,8 +52,8 @@ void Body::setVelocity(glm::vec3 velocity) {
 }
 
 void Body::setMass(float mass) {
-    state.mass = mass;
-    state.invMass = 1.0f / mass;
+    mass = mass;
+    invMass = 1.0f / mass;
 }
 
 void Body::setFixed(bool fixed) {
@@ -73,13 +75,12 @@ Body::Derivative Body::evaluate(
     double dt,
     const Body::Derivative & deriv)
 {
-    state.x += deriv.v * (float)dt;
-    state.p += deriv.f * (float)dt;
-    state.recalculate();
+    state.x += deriv.dx * (float)dt;
+    state.v += deriv.dv * (float)dt;
 
     Derivative outd;
-    outd.v = state.v;
-    outd.f = force;
+    outd.dx = state.v;
+    outd.dv = force * invMass;
 
     return outd;
 }
@@ -90,12 +91,11 @@ void Body::integrate(double t, double dt) {
     Derivative k3 = evaluate(state, t, dt * 0.5, k2);
     Derivative k4 = evaluate(state, t, dt, k3);
 
-    glm::vec3 dxdt = 1.0f / 6.0f * (k1.v + 2.0f * (k2.v + k3.v) + k4.v);
-    glm::vec3 dpdt = 1.0f / 6.0f * (k1.f + 2.0f * (k2.f + k3.f) + k4.f);
+    glm::vec3 dxdt = 1.0f / 6.0f * (k1.dx + 2.0f * (k2.dx + k3.dx) + k4.dx);
+    glm::vec3 dvdt = 1.0f / 6.0f * (k1.dv + 2.0f * (k2.dv + k3.dv) + k4.dv);
 
     state.x += dxdt * (float)dt;
-    state.p += dpdt * (float)dt;
-    state.recalculate();
+    state.v += dvdt * (float)dt;
 
     force = glm::vec3();
 }
