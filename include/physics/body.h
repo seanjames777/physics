@@ -58,6 +58,8 @@ public:
 
     void addForce(glm::vec3 force);
 
+    void addImpulse(glm::vec3 impulse);
+
     glm::vec3 getPosition();
 
     glm::vec3 getVelocity();

@@ -22,7 +22,7 @@ namespace Physics {
 
 System::System()
     : gravity(glm::vec3(0, -9.8f, 0)),
-      step(1.0 / 250.0),
+      step(1.0 / 60.0),
       time(0.0),
       accumTime(0.0)
 {

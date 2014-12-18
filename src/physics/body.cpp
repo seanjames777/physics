@@ -67,6 +67,10 @@ void Body::addForce(glm::vec3 force) {
     this->force += force;
 }
 
+void Body::addImpulse(glm::vec3 impulse) {
+    state.v += impulse * invMass;
+}
+
 // RK4 integrator
 // http://gafferongames.com/game-physics/integration-basics/
 Body::Derivative Body::evaluate(

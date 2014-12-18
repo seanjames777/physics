@@ -8,16 +8,17 @@
 
 namespace Physics { namespace Util {
 
-PlaneMesh::PlaneMesh(std::shared_ptr<Shader> shader, std::shared_ptr<Body> body)
+PlaneMesh::PlaneMesh(std::shared_ptr<Shader> shader, std::shared_ptr<Body> body,
+    float width, float height)
     : Mesh(shader, body)
 {
     MeshVertex vertices[4];
     int indices[6];
 
-    vertices[0].position = glm::vec3(-1, 0, -1);
-    vertices[1].position = glm::vec3(-1, 0,  1);
-    vertices[2].position = glm::vec3( 1, 0,  1);
-    vertices[3].position = glm::vec3( 1, 0, -1);
+    vertices[0].position = glm::vec3(-width, 0, -height);
+    vertices[1].position = glm::vec3(-width, 0,  height);
+    vertices[2].position = glm::vec3( width, 0,  height);
+    vertices[3].position = glm::vec3( width, 0, -height);
 
     vertices[0].normal = glm::vec3(0, 1, 0);
     vertices[1].normal = glm::vec3(0, 1, 0);

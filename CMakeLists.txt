@@ -9,6 +9,7 @@ add_library(physics
     src/physics/body.cpp
     src/physics/system.cpp
     src/physics/constraint.cpp
+    src/physics/rodconstraint.cpp
     src/physics/springconstraint.cpp
 )
 

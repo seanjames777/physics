@@ -10,6 +10,7 @@
 #include <util/planemesh.h>
 #include <util/spheremesh.h>
 #include <physics/springconstraint.h>
+#include <physics/rodconstraint.h>
 
 using namespace Physics;
 using namespace Physics::Util;
@@ -19,7 +20,7 @@ private:
 
     std::shared_ptr<Mesh> quad, sphere;
     std::shared_ptr<Body> quadBody, sphereBody;
-    std::shared_ptr<SpringConstraint> spring;
+    std::shared_ptr<Constraint> spring;
 
 protected:
 
@@ -34,16 +35,18 @@ protected:
         system->addBody(sphereBody);
 
         quadBody->setFixed(true);
-        sphereBody->setPosition(glm::vec3(-7.0f, 0.0f, 0));
+        sphereBody->setPosition(glm::vec3(-5.0f, 12.0f, 0));
+        sphereBody->setVelocity(glm::vec3(-10, -10, 0));
 
-        quad = std::make_shared<PlaneMesh>(shader, quadBody);
-        sphere = std::make_shared<SphereMesh>(shader, sphereBody);
+        quad = std::make_shared<PlaneMesh>(shader, quadBody, 20, 10);
+        sphere = std::make_shared<SphereMesh>(shader, sphereBody, 30, 15, 1);
 
-        spring = std::make_shared<SpringConstraint>(quadBody, sphereBody, 4.0f, 7.0f, 0.01f);
+        //spring = std::make_shared<SpringConstraint>(quadBody, sphereBody, 4.0f, 7.0f, 0.01f);
+        spring = std::make_shared<RodConstraint>(quadBody, sphereBody, 12.0f);
         system->addConstraint(spring);
 
-        cam->setPosition(glm::vec3(0, -10, 30));
-        cam->setTarget(glm::vec3(0, -10, 0));
+        cam->setPosition(glm::vec3(0, 10, 40));
+        cam->setTarget(glm::vec3(0, 0, 0));
     }
 
     virtual void draw_demo() override {
