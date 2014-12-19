@@ -78,7 +78,7 @@ Demo::Demo(std::string title, int width, int height, int shadowSize)
       camera(nullptr),
       system(nullptr),
       time(0.0),
-      lightDir(glm::normalize(glm::vec3(.25f, 1, .25f))),
+      lightDir(glm::normalize(glm::vec3(0.8f, 1.0f, 0.6f))),
       shadowBounds(50.0f),
       shadowNear(-50.0f),
       shadowFar(50.0f),

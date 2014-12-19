@@ -49,7 +49,7 @@ CubeMesh::CubeMesh(std::shared_ptr<Body> body, float width, float height,
     v2 += 4;
     v3 += 4;
 
-    // Bottom
+    // Top
     vertices[v0].position = glm::vec3(-width, height, -depth);
     vertices[v1].position = glm::vec3(-width, height,  depth);
     vertices[v2].position = glm::vec3( width, height,  depth);
@@ -139,10 +139,10 @@ CubeMesh::CubeMesh(std::shared_ptr<Body> body, float width, float height,
     vertices[v2].position = glm::vec3( width, height, -depth);
     vertices[v3].position = glm::vec3( width, -height, -depth);
 
-    vertices[v0].normal = glm::vec3(0, 1, -1);
-    vertices[v1].normal = glm::vec3(0, 1, -1);
-    vertices[v2].normal = glm::vec3(0, 1, -1);
-    vertices[v3].normal = glm::vec3(0, 1, -1);
+    vertices[v0].normal = glm::vec3(0, 0, -1);
+    vertices[v1].normal = glm::vec3(0, 0, -1);
+    vertices[v2].normal = glm::vec3(0, 0, -1);
+    vertices[v3].normal = glm::vec3(0, 0, -1);
 
     vertices[v0].uv = glm::vec2(0, 0);
     vertices[v1].uv = glm::vec2(0, 1);
@@ -167,10 +167,10 @@ CubeMesh::CubeMesh(std::shared_ptr<Body> body, float width, float height,
     vertices[v2].position = glm::vec3( width, height, depth);
     vertices[v3].position = glm::vec3( width, -height, depth);
 
-    vertices[v0].normal = glm::vec3(0, 1, -1);
-    vertices[v1].normal = glm::vec3(0, 1, -1);
-    vertices[v2].normal = glm::vec3(0, 1, -1);
-    vertices[v3].normal = glm::vec3(0, 1, -1);
+    vertices[v0].normal = glm::vec3(0, 0, 1);
+    vertices[v1].normal = glm::vec3(0, 0, 1);
+    vertices[v2].normal = glm::vec3(0, 0, 1);
+    vertices[v3].normal = glm::vec3(0, 0, 1);
 
     vertices[v0].uv = glm::vec2(0, 0);
     vertices[v1].uv = glm::vec2(0, 1);
