@@ -38,6 +38,15 @@ void Demo::resizeHandler(GLFWwindow *window, int width, int height) {
     demo->camera->setAspectRatio((float)width / (float)height);
 }
 
+void Demo::mouseHandler(GLFWwindow *window, int button, int action, int mods) {
+    if (action != GLFW_PRESS)
+        return;
+
+    Demo *demo = (Demo *)glfwGetWindowUserPointer(window);
+
+    demo->demo_mouseDown(button);
+}
+
 std::shared_ptr<Shader> Demo::getDefaultShader() {
     return shader;
 }
@@ -73,6 +82,7 @@ Demo::Demo()
 
     glfwSetWindowUserPointer(window, this);
     glfwSetWindowSizeCallback(window, resizeHandler);
+    glfwSetMouseButtonCallback(window, mouseHandler);
 
     glfwMakeContextCurrent(window);
 

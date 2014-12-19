@@ -72,6 +72,16 @@ public:
     glm::mat4 getViewProjection();
 
     /**
+     * @brief Get position
+     */
+    glm::vec3 getPosition();
+
+    /**
+     * @brief Get target
+     */
+    glm::vec3 getTarget();
+
+    /**
      * @brief Set position
      */
     void setPosition(glm::vec3 position);

@@ -16,8 +16,8 @@ glm::vec3 spherePos(float u, float v, float r) {
 
     return glm::vec3(
         sinf(phi) * cosf(theta),
-        cosf(phi) * r,
-        sinf(phi) * sinf(theta));
+        cosf(phi),
+        sinf(phi) * sinf(theta)) * r;
 }
 
 SphereMesh::SphereMesh(std::shared_ptr<Shader> shader, std::shared_ptr<Body> body,

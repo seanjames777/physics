@@ -32,7 +32,7 @@ void SpringConstraint::apply(double t, double dt) {
     force += damping * rvel;
 
     //b1->addForce(-k * diff * (dist - length));
-    b2->addForce(force);
+    //b2->addForce(force);
 }
 
 }

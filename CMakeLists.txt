@@ -3,7 +3,7 @@ project(physics)
 
 include_directories(include/)
 
-set(CMAKE_CXX_FLAGS "-std=c++11 -fno-exceptions -fno-rtti -O3")
+set(CMAKE_CXX_FLAGS "-std=c++11 -fno-exceptions -O3")
 
 add_library(physics
     src/physics/body.cpp
@@ -11,6 +11,9 @@ add_library(physics
     src/physics/constraint.cpp
     src/physics/rodconstraint.cpp
     src/physics/springconstraint.cpp
+    src/physics/collisionshape.cpp
+    src/physics/sphereshape.cpp
+    src/physics/planeshape.cpp
 )
 
 add_library(util

@@ -43,6 +43,16 @@ private:
     static void resizeHandler(GLFWwindow *window, int width, int height);
 
     /**
+     * @brief Handle mouse events
+     *
+     * @param[in] window Window that received event
+     * @param[in] button Mouse button
+     * @param[in] action Action: press or release
+     * @param[in] mods   Modifier keys
+     */
+    static void mouseHandler(GLFWwindow *window, int button, int action, int mods);
+
+    /**
      * @brief Get current time in seconds
      */
     static double getTime();
@@ -63,6 +73,11 @@ protected:
      * @brief Overriden by derived classes to tear down a demo
      */
     virtual void destroy_demo() = 0;
+
+    /**
+     * @brief Overriden by derived classes to handle mouse clicks
+     */
+    virtual void demo_mouseDown(int button) = 0; // TODO shouldnt all be =0
 
     /**
      * @brief Get the default object shader

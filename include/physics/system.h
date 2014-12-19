@@ -9,12 +9,15 @@
 #ifndef __SYSTEM_H
 #define __SYSTEM_H
 
-#include <physics/body.h>
-#include <physics/constraint.h>
+#include <glm/vec3.hpp>
 #include <vector>
 #include <memory>
 
 namespace Physics {
+
+class Body;
+class Constraint;
+class Contact;
 
 /**
  * @brief Physics system, which tracks bodies that may interact, and integrates
@@ -29,6 +32,9 @@ private:
     double step;
     double accumTime;
     double time;
+    double timeWarp; // TODO doubles are too big maybe
+
+    void resolveContact(Contact & contact);
 
 public:
 

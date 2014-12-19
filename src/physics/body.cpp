@@ -9,99 +9,96 @@
 
 namespace Physics {
 
-Body::Body()
+Body::Body(std::shared_ptr<CollisionShape> shape)
     : fixed(false),
       mass(1.0f),
-      invMass(1.0f)
+      invMass(1.0f),
+      shape(shape)
 {
 }
 
 Body::~Body() {
 }
 
+std::shared_ptr<CollisionShape> Body::getCollisionShape() {
+    return shape;
+}
+
+void Body::setCollisionShape(std::shared_ptr<CollisionShape> shape) {
+    this->shape = shape;
+}
+
 glm::vec3 Body::getPosition() {
-    return state.x;
+    return position;
 }
 
 glm::vec3 Body::getVelocity() {
-    return state.v;
+    return velocity;
 }
 
 float Body::getMass() {
+    if (fixed)
+        return 1.0f / 0.0f; // Infinity // TODO
+
     return mass;
+}
+
+float Body::getInverseMass() {
+    if (fixed)
+        return 0.0f;
+
+    return invMass;
 }
 
 bool Body::getFixed() {
     return fixed;
 }
 
-glm::vec3 Body::getForce() {
-    return force;
-}
-
 glm::mat4 Body::getTransform() {
-    return glm::translate(glm::mat4(), state.x);
+    return glm::translate(glm::mat4(), position);
 }
 
 void Body::setPosition(glm::vec3 position) {
-    state.x = position;
+    this->position = position;
 }
 
 void Body::setVelocity(glm::vec3 velocity) {
-    state.v = velocity;
+    this->velocity = velocity;
 }
 
 void Body::setMass(float mass) {
-    mass = mass;
-    invMass = 1.0f / mass;
+    this->mass = mass;
+    this->invMass = 1.0f / mass;
 }
 
 void Body::setFixed(bool fixed) {
     this->fixed = fixed;
 }
 
-void Body::addForce(glm::vec3 force) {
+void Body::addVelocity(glm::vec3 velocity) {
+    // TODO Inline these functions
+
     if (fixed)
         return;
 
-    this->force += force;
+    this->velocity += velocity;
 }
 
 void Body::addImpulse(glm::vec3 impulse) {
-    state.v += impulse * invMass;
+    addVelocity(impulse * invMass);
 }
 
-// RK4 integrator
-// http://gafferongames.com/game-physics/integration-basics/
-Body::Derivative Body::evaluate(
-    State initial,
-    double t,
-    double dt,
-    const Body::Derivative & deriv)
-{
-    state.x += deriv.dx * (float)dt;
-    state.v += deriv.dv * (float)dt;
-
-    Derivative outd;
-    outd.dx = state.v;
-    outd.dv = force * invMass;
-
-    return outd;
+void Body::addForce(glm::vec3 force) {
+    this->force += force;
 }
 
-void Body::integrate(double t, double dt) {
-    Derivative k1 = evaluate(state, t, 0.0, Derivative());
-    Derivative k2 = evaluate(state, t, dt * 0.5, k1);
-    Derivative k3 = evaluate(state, t, dt * 0.5, k2);
-    Derivative k4 = evaluate(state, t, dt, k3);
-
-    glm::vec3 dxdt = 1.0f / 6.0f * (k1.dx + 2.0f * (k2.dx + k3.dx) + k4.dx);
-    glm::vec3 dvdt = 1.0f / 6.0f * (k1.dv + 2.0f * (k2.dv + k3.dv) + k4.dv);
-
-    state.x += dxdt * (float)dt;
-    state.v += dvdt * (float)dt;
-
+void Body::integrateVelocities(double dt) {
+    addVelocity(force * invMass * (float)dt);
     force = glm::vec3();
+}
+
+void Body::integrateTransform(double dt) {
+    position += velocity * (float)dt;
 }
 
 }

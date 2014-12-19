@@ -26,7 +26,7 @@ Camera::Camera(glm::vec3 position, glm::vec3 target)
       fov(45.0f),
       aspect(1.0f),
       near(1.0f),
-      far(100.0f),
+      far(400.0f),
       view(),
       projection(),
       viewProjection()
@@ -48,6 +48,14 @@ glm::mat4 Camera::getProjection() {
 
 glm::mat4 Camera::getViewProjection() {
     return viewProjection;
+}
+
+glm::vec3 Camera::getPosition() {
+    return position;
+}
+
+glm::vec3 Camera::getTarget() {
+    return target;
 }
 
 void Camera::setPosition(glm::vec3 position) {

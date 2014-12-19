@@ -29,9 +29,10 @@ void RodConstraint::apply(double t, double dt) {
     glm::vec3 move = diff * (dist - length);
     glm::vec3 vel = move * 0.15f / (float)dt;
 
+    // Want the relative velocity along the normal to be 0
     glm::vec3 relVel = b1->getVelocity() - b2->getVelocity();
     float dot = glm::dot(diff, relVel);
-    vel += diff * dot;
+    vel += diff * 0.95f * dot;
 
     //b1->addForce(-k * diff * (dist - length));
     //b2->addForce(force);

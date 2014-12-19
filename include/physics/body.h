@@ -14,37 +14,28 @@
 
 namespace Physics {
 
+class CollisionShape;
+
 class Body {
 private:
 
-    struct State {
-        // Primary
-        glm::vec3 x;
-        glm::vec3 v;
-    };
-
-    struct Derivative {
-        glm::vec3 dx;
-        glm::vec3 dv;
-    };
-
-    State     state;
+    glm::vec3 position;
+    glm::vec3 velocity;
     glm::vec3 force;
-    bool      fixed;
+    bool fixed;
     float     mass;
     float     invMass;
-
-    Derivative evaluate(
-        State initial,
-        double t,
-        double dt,
-        const Derivative & d);
+    std::shared_ptr<CollisionShape> shape;
 
 public:
 
-    Body();
+    Body(std::shared_ptr<CollisionShape> shape = nullptr);
 
     ~Body();
+
+    std::shared_ptr<CollisionShape> getCollisionShape();
+
+    void setCollisionShape(std::shared_ptr<CollisionShape> shape);
 
     glm::mat4 getTransform();
 
@@ -56,9 +47,11 @@ public:
 
     void setFixed(bool fixed);
 
-    void addForce(glm::vec3 force);
+    void addVelocity(glm::vec3 velocity);
 
     void addImpulse(glm::vec3 impulse);
+
+    void addForce(glm::vec3 force);
 
     glm::vec3 getPosition();
 
@@ -66,11 +59,13 @@ public:
 
     float getMass();
 
+    float getInverseMass();
+
     bool getFixed();
 
-    glm::vec3 getForce();
+    void integrateVelocities(double dt);
 
-    void integrate(double t, double dt);
+    void integrateTransform(double dt);
 
 };
 

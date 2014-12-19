@@ -11,6 +11,9 @@
 #include <util/spheremesh.h>
 #include <physics/springconstraint.h>
 #include <physics/rodconstraint.h>
+#include <physics/sphereshape.h>
+#include <physics/planeshape.h>
+#include <iostream>
 
 using namespace Physics;
 using namespace Physics::Util;
@@ -18,35 +21,60 @@ using namespace Physics::Util;
 class Demo1 : public Demo {
 private:
 
-    std::shared_ptr<Mesh> quad, sphere;
-    std::shared_ptr<Body> quadBody, sphereBody;
-    std::shared_ptr<Constraint> spring;
+    std::vector<std::shared_ptr<Mesh>> meshes;
 
 protected:
+
+    // TODO: constraints that don't require extra bodies
 
     virtual void init_demo() override {
         std::shared_ptr<Shader> shader = getDefaultShader();
         std::shared_ptr<Camera> cam = getCamera();
         std::shared_ptr<System> system = getSystem();
 
-        quadBody = std::make_shared<Body>();
-        sphereBody = std::make_shared<Body>();
-        system->addBody(quadBody);
-        system->addBody(sphereBody);
-
+        // Ground plane
+        auto quadBody = std::make_shared<Body>();
+        quadBody->setPosition(glm::vec3(0, 0, 0));
         quadBody->setFixed(true);
-        sphereBody->setPosition(glm::vec3(-5.0f, 12.0f, 0));
-        sphereBody->setVelocity(glm::vec3(-10, -10, 0));
+        quadBody->setCollisionShape(std::make_shared<PlaneShape>(glm::vec3(0, 1, 0), 0));
+        meshes.push_back(std::make_shared<PlaneMesh>(shader, quadBody, 20, 10));
+        system->addBody(quadBody);
 
-        quad = std::make_shared<PlaneMesh>(shader, quadBody, 20, 10);
-        sphere = std::make_shared<SphereMesh>(shader, sphereBody, 30, 15, 1);
+        int N = 14;
+        float R = 1.0f;
 
-        //spring = std::make_shared<SpringConstraint>(quadBody, sphereBody, 4.0f, 7.0f, 0.01f);
-        spring = std::make_shared<RodConstraint>(quadBody, sphereBody, 12.0f);
-        system->addConstraint(spring);
+        float dy = sqrtf((R * 2.0f) * (R * 2.0f) - R * R);
 
-        cam->setPosition(glm::vec3(0, 10, 40));
-        cam->setTarget(glm::vec3(0, 0, 0));
+        for (int j = 0; j < N; j++) {
+            for (int i = 0; i < N - j; i++) {
+                glm::vec3 p = glm::vec3(-(N - j - 1) * R + i * 2.0f * R, j * dy + R, 0.0f);
+
+                auto sphereBody = std::make_shared<Body>();
+                system->addBody(sphereBody);
+                sphereBody->setPosition(p);
+                sphereBody->setCollisionShape(std::make_shared<SphereShape>(R));
+
+                if (j == 0 && (i == 0 || i == N - j - 1))
+                    sphereBody->setFixed(true);
+
+                meshes.push_back(std::make_shared<SphereMesh>(shader, sphereBody, 30, 15, 1));
+            }
+        }
+
+        cam->setPosition(glm::vec3(10, 20, 40));
+        cam->setTarget(glm::vec3(0, N * R, 0));
+    }
+
+    virtual void demo_mouseDown(int button) {
+        std::shared_ptr<Camera> cam = getCamera();
+
+        auto sphereBody = std::make_shared<Body>();
+        getSystem()->addBody(sphereBody);
+        sphereBody->setPosition(cam->getPosition());
+        sphereBody->setVelocity(glm::normalize(cam->getTarget() - cam->getPosition()) * 100.0f);
+        sphereBody->setCollisionShape(std::make_shared<SphereShape>(3.0f));
+        sphereBody->setMass(5.0f);
+        meshes.push_back(std::make_shared<SphereMesh>(getDefaultShader(), sphereBody, 30, 15, 3.0f));
     }
 
     virtual void draw_demo() override {
@@ -54,8 +82,8 @@ protected:
 
         //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-        quad->draw(cam->getViewProjection());
-        sphere->draw(cam->getViewProjection());
+        for (auto mesh : meshes)
+            mesh->draw(cam->getViewProjection());
 
         //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
