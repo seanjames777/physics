@@ -9,14 +9,23 @@
 #ifndef __DEMO_H
 #define __DEMO_H
 
-#include <physics/system.h>
-#include <util/shader.h>
-#include <util/camera.h>
 #include <memory>
+#include <vector>
+#include <glm/glm.hpp>
+#include <string>
 
 class GLFWwindow;
 
-namespace Physics { namespace Util {
+namespace Physics {
+
+class System;
+
+namespace Util {
+
+class Mesh;
+class RenderTarget;
+class Shader;
+class Camera;
 
 /**
  * @brief Demo application base class
@@ -24,14 +33,23 @@ namespace Physics { namespace Util {
 class Demo {
 private:
 
-    int                      width;  //!< Window width
-    int                      height; //!< Window height
-    GLFWwindow              *window; //!< GLFW window
-    bool                     close;  //!< Whether demo should exit
-    std::shared_ptr<Shader>  shader; //!< Default object shader
-    std::shared_ptr<Camera>  camera; //!< Camera
-    std::shared_ptr<System>  system; //!< Physics system
-    double                   time;   //!< Current time
+    int                                 width;                 //!< Window width
+    int                                 height;                //!< Window height
+    int                                 shadowSize;            //!< Shadow map width and height
+    GLFWwindow                         *window;                //!< GLFW window
+    bool                                close;                 //!< Whether demo should exit
+    std::shared_ptr<Shader>             phong_shader;          //!< Default object shader
+    std::shared_ptr<Shader>             shadow_shader;         //!< Default object shader
+    std::shared_ptr<Camera>             camera;                //!< Camera
+    std::shared_ptr<System>             system;                //!< Physics system
+    double                              time;                  //!< Current time
+    std::vector<std::shared_ptr<Mesh>>  meshes;                //!< List of meshes to draw
+    glm::vec3                           lightDir;              //!< Global light direction
+    float                               shadowBounds;          //!< Shadow view rectangle width/height
+    float                               shadowNear;            //!< Shadow near plane
+    float                               shadowFar;             //!< Shadow far plane
+    glm::mat4                           lightViewProjection;   //!< Shadow view * projectionm matrix
+    std::shared_ptr<RenderTarget>       shadowTarget;          //!< Shadow render target
 
     /**
      * @brief Handle window resize events
@@ -57,17 +75,17 @@ private:
      */
     static double getTime();
 
+    /**
+     * @brief Draw demo scene
+     */
+    void draw();
+
 protected:
 
     /**
      * @brief Overriden by derived classes to setup the demo scene
      */
     virtual void init_demo() = 0;
-
-    /**
-     * @brief Overriden by derived classes to draw a frame
-     */
-    virtual void draw_demo() = 0;
 
     /**
      * @brief Overriden by derived classes to tear down a demo
@@ -80,11 +98,6 @@ protected:
     virtual void demo_mouseDown(int button) = 0; // TODO shouldnt all be =0
 
     /**
-     * @brief Get the default object shader
-     */
-    std::shared_ptr<Shader> getDefaultShader();
-
-    /**
      * @brief Get the camera
      */
     std::shared_ptr<Camera> getCamera();
@@ -94,12 +107,18 @@ protected:
      */
     std::shared_ptr<System> getSystem();
 
+    /**
+     * @brief Add a mesh to the list of meshes to draw
+     */
+    void addMesh(std::shared_ptr<Mesh> mesh);
+
 public:
 
     /**
      * @brief Constructor
      */
-    Demo();
+    Demo(std::string title = "Physics Demo", int width = 1024,
+        int height = 768, int shadowSize = 1024);
 
     /**
      * @brief Run demo to completion

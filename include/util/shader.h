@@ -93,6 +93,16 @@ public:
      */
     GLuint getProgram();
 
+    /**
+     * @brief Bind shader for rendering
+     */
+    void bind();
+
+    /**
+     * @brief Un-bind shader
+     */
+    void unbind();
+
 };
 
 }}

@@ -8,9 +8,8 @@
 
 namespace Physics { namespace Util {
 
-PlaneMesh::PlaneMesh(std::shared_ptr<Shader> shader, std::shared_ptr<Body> body,
-    float width, float height)
-    : Mesh(shader, body)
+PlaneMesh::PlaneMesh(std::shared_ptr<Body> body, float width, float height)
+    : Mesh(body)
 {
     MeshVertex vertices[4];
     int indices[6];

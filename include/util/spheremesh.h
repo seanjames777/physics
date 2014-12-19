@@ -24,8 +24,7 @@ public:
      *
      * @param[in] shader Shader
      */
-    SphereMesh(std::shared_ptr<Shader> shader, std::shared_ptr<Body> body,
-        int divu, int divv, float r);
+    SphereMesh(std::shared_ptr<Body> body, int divu, int divv, float r);
 
 };
 

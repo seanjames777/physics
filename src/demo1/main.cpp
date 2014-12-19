@@ -9,26 +9,30 @@
 #include <util/demo.h>
 #include <util/planemesh.h>
 #include <util/spheremesh.h>
+#include <util/camera.h>
 #include <physics/springconstraint.h>
 #include <physics/rodconstraint.h>
 #include <physics/sphereshape.h>
 #include <physics/planeshape.h>
+#include <physics/system.h>
 #include <iostream>
 
 using namespace Physics;
 using namespace Physics::Util;
 
 class Demo1 : public Demo {
-private:
+public:
 
-    std::vector<std::shared_ptr<Mesh>> meshes;
+    Demo1()
+        : Demo("Stacking Demo")
+    {
+    }
 
 protected:
 
     // TODO: constraints that don't require extra bodies
 
     virtual void init_demo() override {
-        std::shared_ptr<Shader> shader = getDefaultShader();
         std::shared_ptr<Camera> cam = getCamera();
         std::shared_ptr<System> system = getSystem();
 
@@ -37,7 +41,7 @@ protected:
         quadBody->setPosition(glm::vec3(0, 0, 0));
         quadBody->setFixed(true);
         quadBody->setCollisionShape(std::make_shared<PlaneShape>(glm::vec3(0, 1, 0), 0));
-        meshes.push_back(std::make_shared<PlaneMesh>(shader, quadBody, 20, 10));
+        addMesh(std::make_shared<PlaneMesh>(quadBody, 20, 10));
         system->addBody(quadBody);
 
         int N = 14;
@@ -57,7 +61,7 @@ protected:
                 if (j == 0 && (i == 0 || i == N - j - 1))
                     sphereBody->setFixed(true);
 
-                meshes.push_back(std::make_shared<SphereMesh>(shader, sphereBody, 30, 15, 1));
+                addMesh(std::make_shared<SphereMesh>(sphereBody, 30, 15, 1));
             }
         }
 
@@ -74,18 +78,7 @@ protected:
         sphereBody->setVelocity(glm::normalize(cam->getTarget() - cam->getPosition()) * 100.0f);
         sphereBody->setCollisionShape(std::make_shared<SphereShape>(3.0f));
         sphereBody->setMass(5.0f);
-        meshes.push_back(std::make_shared<SphereMesh>(getDefaultShader(), sphereBody, 30, 15, 3.0f));
-    }
-
-    virtual void draw_demo() override {
-        std::shared_ptr<Camera> cam = getCamera();
-
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-        for (auto mesh : meshes)
-            mesh->draw(cam->getViewProjection());
-
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        addMesh(std::make_shared<SphereMesh>(sphereBody, 30, 15, 3.0f));
     }
 
     virtual void destroy_demo() override {

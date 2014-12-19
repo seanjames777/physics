@@ -5,17 +5,14 @@
  */
 
 #include <util/mesh.h>
-#include <glm/gtc/type_ptr.hpp>
 
 namespace Physics { namespace Util {
 
-Mesh::Mesh(std::shared_ptr<Shader> shader, std::shared_ptr<Body> body)
+Mesh::Mesh(std::shared_ptr<Body> body)
     : vb(0),
       ib(0),
       vao(0),
-      shader(shader),
       body(body),
-      worldViewProjectionLocation(0),
       nIndices(0)
 {
     glGenVertexArrays(1, &vao);
@@ -42,17 +39,16 @@ Mesh::Mesh(std::shared_ptr<Shader> shader, std::shared_ptr<Body> body)
     offset += sizeof(float) * 2;
 
     glBindVertexArray(0);
-
-    worldInverseTransposeLocation = glGetUniformLocation(
-        shader->getProgram(), "worldInverseTranspose");
-    worldViewProjectionLocation = glGetUniformLocation(
-        shader->getProgram(), "worldViewProjection");
 }
 
 Mesh::~Mesh() {
     glDeleteBuffers(1, &vb);
     glDeleteBuffers(1, &ib);
     glDeleteVertexArrays(1, &vao);
+}
+
+glm::mat4 Mesh::getTransform() {
+    return body->getTransform();
 }
 
 void Mesh::setVertices(MeshVertex *vertices, int nVertices) {
@@ -70,22 +66,10 @@ void Mesh::setIndices(int *indices, int nIndices) {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void Mesh::draw(glm::mat4 viewProjection) {
-    glUseProgram(shader->getProgram());
-
-    glm::mat4 world = body->getTransform();
-    glm::mat4 worldViewProjection = viewProjection * world;
-    glm::mat4x4 worldInverseTranspose = glm::transpose(glm::inverse(world));
-
-    glUniformMatrix4fv(worldViewProjectionLocation, 1, false,
-        glm::value_ptr(worldViewProjection));
-    glUniformMatrix4fv(worldInverseTransposeLocation, 1, false,
-        glm::value_ptr(worldInverseTranspose));
-
+void Mesh::draw() {
     glBindVertexArray(vao);
     glDrawElements(GL_TRIANGLES, nIndices, GL_UNSIGNED_INT, NULL);
-    glBindVertexArray(0);
-    glUseProgram(0);
+    glBindVertexArray(0); // TODO
 }
 
 }}

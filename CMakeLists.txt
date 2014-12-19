@@ -19,6 +19,7 @@ add_library(physics
 add_library(util
     src/util/camera.cpp
     src/util/shader.cpp
+    src/util/rendertarget.cpp
     src/util/mesh.cpp
     src/util/planemesh.cpp
     src/util/spheremesh.cpp
@@ -41,3 +42,5 @@ install(TARGETS demo1 DESTINATION bin/)
 
 install(FILES content/shaders/phong.vs DESTINATION bin/content/shaders/)
 install(FILES content/shaders/phong.fs DESTINATION bin/content/shaders/)
+install(FILES content/shaders/shadow.vs DESTINATION bin/content/shaders/)
+install(FILES content/shaders/shadow.fs DESTINATION bin/content/shaders/)

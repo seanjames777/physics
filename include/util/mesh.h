@@ -34,23 +34,22 @@ private:
     GLuint                  vb;
     GLuint                  ib;
     GLuint                  vao;
-    std::shared_ptr<Shader> shader;
     std::shared_ptr<Body>   body;
-    GLuint                  worldViewProjectionLocation;
-    GLuint                  worldInverseTransposeLocation;
     int                     nIndices;
 
 public:
 
-    Mesh(std::shared_ptr<Shader> shader, std::shared_ptr<Body> body);
+    Mesh(std::shared_ptr<Body> body);
 
     virtual ~Mesh();
+
+    glm::mat4 getTransform();
 
     void setVertices(MeshVertex *vertices, int nVertices);
 
     void setIndices(int *indices, int nIndices);
 
-    void draw(glm::mat4 viewProjection);
+    void draw();
 
 };
 

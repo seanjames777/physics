@@ -190,4 +190,12 @@ GLuint Shader::getProgram() {
     return program;
 }
 
+void Shader::bind() {
+    glUseProgram(program);
+}
+
+void Shader::unbind() {
+    glUseProgram(0);
+}
+
 }}

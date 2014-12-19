@@ -20,9 +20,8 @@ glm::vec3 spherePos(float u, float v, float r) {
         sinf(phi) * sinf(theta)) * r;
 }
 
-SphereMesh::SphereMesh(std::shared_ptr<Shader> shader, std::shared_ptr<Body> body,
-    int nu, int nv, float r)
-    : Mesh(shader, body)
+SphereMesh::SphereMesh(std::shared_ptr<Body> body, int nu, int nv, float r)
+    : Mesh(body)
 {
     std::vector<MeshVertex> vertices;
     std::vector<int> indices;

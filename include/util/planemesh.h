@@ -24,8 +24,7 @@ public:
      *
      * @param[in] shader Shader
      */
-    PlaneMesh(std::shared_ptr<Shader> shader, std::shared_ptr<Body> body,
-        float width, float height);
+    PlaneMesh(std::shared_ptr<Body> body, float width, float height);
 
 };
 
