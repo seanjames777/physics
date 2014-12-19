@@ -9,6 +9,7 @@
 #include <util/demo.h>
 #include <util/planemesh.h>
 #include <util/spheremesh.h>
+#include <util/cubemesh.h>
 #include <util/camera.h>
 #include <physics/springconstraint.h>
 #include <physics/rodconstraint.h>
@@ -61,7 +62,7 @@ protected:
                 if (j == 0 && (i == 0 || i == N - j - 1))
                     sphereBody->setFixed(true);
 
-                addMesh(std::make_shared<SphereMesh>(sphereBody, 30, 15, 1));
+                addMesh(std::make_shared<CubeMesh>(sphereBody, 1, 1, 1));
             }
         }
 

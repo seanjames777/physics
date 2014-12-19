@@ -23,6 +23,7 @@ add_library(util
     src/util/mesh.cpp
     src/util/planemesh.cpp
     src/util/spheremesh.cpp
+    src/util/cubemesh.cpp
     src/util/demo.cpp
 )
 
