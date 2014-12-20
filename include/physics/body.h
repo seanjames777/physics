@@ -10,6 +10,7 @@
 #define __BODY_H
 
 #include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
 #include <memory>
 
 namespace Physics {
@@ -20,11 +21,16 @@ class Body {
 private:
 
     glm::vec3 position;
-    glm::vec3 velocity;
+    glm::quat orientation;
+    glm::vec3 linearVelocity;
+    glm::vec3 angularVelocity; // axis * angle
     glm::vec3 force;
-    bool fixed;
+    glm::vec3 torque;       // axis * angle
+    bool      fixed;
     float     mass;
     float     invMass;
+    glm::mat3 inertiaTensor;
+    glm::mat3 invInertiaTensor;
     std::shared_ptr<CollisionShape> shape;
 
 public:
@@ -41,21 +47,39 @@ public:
 
     void setPosition(glm::vec3 position);
 
-    void setVelocity(glm::vec3 velocity);
+    void setLinearVelocity(glm::vec3 linearVelocity);
+
+    void setOrientation(glm::quat orientation);
+
+    void setAngularVelocity(glm::vec3 angularVelocity);
 
     void setMass(float mass);
 
     void setFixed(bool fixed);
 
-    void addVelocity(glm::vec3 velocity);
+    void addLinearVelocity(glm::vec3 velocity);
 
-    void addImpulse(glm::vec3 impulse);
+    void addAngularVelocity(glm::vec3 angularVelocity);
 
-    void addForce(glm::vec3 force);
+    void addLinearImpulse(glm::vec3 impulse);
+
+    void addAngularImpulse(glm::vec3 impulse);
+
+    void addImpulse(glm::vec3 impulse, glm::vec3 relPos);
+
+    void addLinearForce(glm::vec3 force);
+
+    void addTorque(glm::vec3 torque);
+
+    void addForce(glm::vec3 force, glm::vec3 relPos);
 
     glm::vec3 getPosition();
 
-    glm::vec3 getVelocity();
+    glm::quat getOrientation();
+
+    glm::vec3 getLinearVelocity();
+
+    glm::vec3 getAngularVelocity();
 
     float getMass();
 

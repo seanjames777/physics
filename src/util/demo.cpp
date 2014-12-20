@@ -228,7 +228,7 @@ void Demo::draw() {
 
     for (auto & pair : meshes) {
         // TODO redundant
-        glm::mat4 world = glm::translate(glm::mat4(), pair.body->getPosition());
+        glm::mat4 world = pair.body->getTransform();
 
         glm::mat4 worldInverseTranspose = glm::inverse(glm::transpose(world));
         glm::mat4 worldViewProjection = camViewProjection * world;
@@ -297,57 +297,65 @@ Demo::~Demo() {
     glfwTerminate();
 }
 
+glm::vec3 transform(glm::mat4 mat, glm::vec3 vec) {
+    // TODO
+    glm::vec4 v4 = glm::vec4(vec.x, vec.y, vec.z, 1.0f);
+    v4 = mat * v4;
+    return glm::vec3(v4.x, v4.y, v4.z);
+}
+
 void Demo::prepDebug() {
     std::vector<MeshVertex> vertices;
     std::vector<int> indices;
     MeshVertex vert;
 
     for (auto & pair : meshes) {
-        glm::vec3 center = pair.body->getPosition();
         const float diff = 0.5f;
 
         int i0 = vertices.size();
 
+        glm::mat4 world = pair.body->getTransform();
+
         vert.color = glm::vec3(1, 1, 0);
-        vert.position = center + glm::vec3(-diff, 0, 0);
+        vert.position = transform(world, glm::vec3(-diff, 0, 0));
         vertices.push_back(vert);
         vert.color = glm::vec3(1, 1, 0);
-        vert.position = center + glm::vec3(0, 0, 0);
+        vert.position = transform(world, glm::vec3(0, 0, 0));
         vertices.push_back(vert);
 
         vert.color = glm::vec3(1, 1, 0);
-        vert.position = center + glm::vec3(0, -diff, 0);
+        vert.position = transform(world, glm::vec3(0, -diff, 0));
         vertices.push_back(vert);
         vert.color = glm::vec3(1, 1, 0);
-        vert.position = center + glm::vec3(0, 0, 0);
+        vert.position = transform(world, glm::vec3(0, 0, 0));
         vertices.push_back(vert);
 
         vert.color = glm::vec3(1, 1, 0);
-        vert.position = center + glm::vec3(0, 0, -diff);
+        vert.position = transform(world, glm::vec3(0, 0, -diff));
         vertices.push_back(vert);
         vert.color = glm::vec3(1, 1, 0);
-        vert.position = center + glm::vec3(0, 0, 0);
+        vert.position = transform(world, glm::vec3(0, 0, 0));
         vertices.push_back(vert);
 
         vert.color = glm::vec3(1, 0, 0);
-        vert.position = center + glm::vec3(diff, 0, 0);
+        vert.position = transform(world, glm::vec3(diff, 0, 0));
         vertices.push_back(vert);
         vert.color = glm::vec3(1, 0, 0);
-        vert.position = center + glm::vec3(0, 0, 0);
+        vert.position = transform(world, glm::vec3(0, 0, 0));
         vertices.push_back(vert);
 
         vert.color = glm::vec3(0, 1, 0);
-        vert.position = center + glm::vec3(0, diff, 0);
+        vert.position = transform(world, glm::vec3(0, diff, 0));
         vertices.push_back(vert);
         vert.color = glm::vec3(0, 1, 0);
-        vert.position = center + glm::vec3(0, 0, 0);
+        vert.position = transform(world, glm::vec3(0, 0, 0));
         vertices.push_back(vert);
 
         vert.color = glm::vec3(0, 0, 1);
-        vert.position = center + glm::vec3(0, 0, diff);
+        vert.position = transform(world, glm::vec3(0, 0, diff));
         vertices.push_back(vert);
         vert.color = glm::vec3(0, 0, 1);
-        vert.position = center + glm::vec3(0, 0, 0);
+        vert.position = transform(world, glm::vec3(0, 0, 0));
         vertices.push_back(vert);
 
         indices.push_back(i0 + 0);

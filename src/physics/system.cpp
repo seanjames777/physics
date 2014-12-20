@@ -25,9 +25,9 @@ namespace Physics {
 
 System::System()
     : gravity(glm::vec3(0, -9.8f, 0)),
-      step(1.0 / 60.0),
+      step(1.0 / 1000.0),
       time(0.0),
-      timeWarp(1.0),
+      timeWarp(0.05),
       accumTime(0.0)
 {
 }
@@ -58,8 +58,8 @@ void System::resolveContact(Contact & contact) {
     float elasticity = 0.5f;
     float bias = 0.2f;
 
-    glm::vec3 v1 = contact.b1->getVelocity();
-    glm::vec3 v2 = contact.b2->getVelocity();
+    glm::vec3 v1 = contact.b1->getLinearVelocity();
+    glm::vec3 v2 = contact.b2->getLinearVelocity();
     float m1 = contact.b1->getInverseMass();
     float m2 = contact.b2->getInverseMass();
 
@@ -76,8 +76,8 @@ void System::resolveContact(Contact & contact) {
     if (J < 0.0f)
         J = 0.0f;
 
-    contact.b1->addImpulse( J * contact.normal);
-    contact.b2->addImpulse(-J * contact.normal);
+    contact.b1->addLinearImpulse( J * contact.normal);
+    contact.b2->addLinearImpulse(-J * contact.normal);
 
     // TODO: apply frictional impulse
 
@@ -92,7 +92,7 @@ void System::integrate(double t, double dt) {
             (sinf(time) + sinf(time * 0.6f) + sinf(time * 1.7) + sinf(time * 3.4f)) * 1.5f, 0, 0);*/
 
         for (auto body : bodies)
-            body->addForce(gravity * body->getMass());
+            body->addLinearForce(gravity * body->getMass());
 
         for (auto body : bodies)
             body->integrateVelocities(step);

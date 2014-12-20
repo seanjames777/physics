@@ -32,8 +32,16 @@ glm::vec3 Body::getPosition() {
     return position;
 }
 
-glm::vec3 Body::getVelocity() {
-    return velocity;
+glm::vec3 Body::getLinearVelocity() {
+    return linearVelocity;
+}
+
+glm::quat Body::getOrientation() {
+    return orientation;
+}
+
+glm::vec3 Body::getAngularVelocity() {
+    return angularVelocity;
 }
 
 float Body::getMass() {
@@ -55,15 +63,23 @@ bool Body::getFixed() {
 }
 
 glm::mat4 Body::getTransform() {
-    return glm::translate(glm::mat4(), position);
+    return glm::translate(glm::mat4(), position) * glm::mat4_cast(orientation);
 }
 
 void Body::setPosition(glm::vec3 position) {
     this->position = position;
 }
 
-void Body::setVelocity(glm::vec3 velocity) {
-    this->velocity = velocity;
+void Body::setOrientation(glm::quat orientation) {
+    this->orientation = orientation;
+}
+
+void Body::setLinearVelocity(glm::vec3 velocity) {
+    this->linearVelocity = velocity;
+}
+
+void Body::setAngularVelocity(glm::vec3 velocity) {
+    this->angularVelocity = velocity;
 }
 
 void Body::setMass(float mass) {
@@ -75,30 +91,68 @@ void Body::setFixed(bool fixed) {
     this->fixed = fixed;
 }
 
-void Body::addVelocity(glm::vec3 velocity) {
+void Body::addLinearVelocity(glm::vec3 velocity) {
     // TODO Inline these functions
-
+    // TODO Fixed makes a branch
     if (fixed)
         return;
 
-    this->velocity += velocity;
+    this->linearVelocity += velocity;
 }
 
-void Body::addImpulse(glm::vec3 impulse) {
-    addVelocity(impulse * invMass);
+void Body::addAngularVelocity(glm::vec3 velocity) {
+    if (fixed)
+        return;
+
+    this->angularVelocity += velocity;
 }
 
-void Body::addForce(glm::vec3 force) {
+void Body::addLinearImpulse(glm::vec3 impulse) {
+    addLinearVelocity(invMass * impulse);
+}
+
+void Body::addAngularImpulse(glm::vec3 impulse) {
+    addAngularVelocity(invInertiaTensor * impulse);
+}
+
+void Body::addImpulse(glm::vec3 impulse, glm::vec3 relPos) {
+    addLinearImpulse(impulse);
+    addAngularImpulse(glm::cross(relPos, impulse));
+}
+
+void Body::addLinearForce(glm::vec3 force) {
     this->force += force;
 }
 
+void Body::addTorque(glm::vec3 torque) {
+    this->torque += torque;
+}
+
+// TODO might want to pass vectors by reference all over. Probably the
+// compiler is not stupid though
+// TODO const things maybe
+void Body::addForce(glm::vec3 force, glm::vec3 relPos) {
+    addLinearForce(force);
+    addTorque(glm::cross(relPos, force));
+}
+
 void Body::integrateVelocities(double dt) {
-    addVelocity(force * invMass * (float)dt);
+    addLinearVelocity(invMass * force * (float)dt);
+    addAngularVelocity(invInertiaTensor * torque * (float)dt);
+
     force = glm::vec3();
+    torque = glm::vec3();
 }
 
 void Body::integrateTransform(double dt) {
-    position += velocity * (float)dt;
+    position += linearVelocity * (float)dt;
+
+    float angle = glm::length(angularVelocity);
+
+    if (angle != 0.0f) {
+        glm::vec3 axis = angularVelocity / angle;
+        orientation = glm::rotate(orientation, angle, axis);
+    }
 }
 
 }

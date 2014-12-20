@@ -22,7 +22,7 @@ SpringConstraint::~SpringConstraint() {
 }
 
 void SpringConstraint::apply(double t, double dt) {
-    glm::vec3 diff = b1->getPosition() - b2->getPosition();
+    /*glm::vec3 diff = b1->getPosition() - b2->getPosition();
     float dist = glm::length(diff);
     diff = glm::normalize(diff);
 
@@ -32,7 +32,7 @@ void SpringConstraint::apply(double t, double dt) {
     force += damping * rvel;
 
     //b1->addForce(-k * diff * (dist - length));
-    //b2->addForce(force);
+    //b2->addForce(force);*/
 }
 
 }

@@ -21,7 +21,7 @@ RodConstraint::~RodConstraint() {
 }
 
 void RodConstraint::apply(double t, double dt) {
-    glm::vec3 diff = b1->getPosition() - b2->getPosition();
+    /*glm::vec3 diff = b1->getPosition() - b2->getPosition();
     float dist = glm::length(diff);
     diff = glm::normalize(diff);
 
@@ -37,7 +37,7 @@ void RodConstraint::apply(double t, double dt) {
     //b1->addForce(-k * diff * (dist - length));
     //b2->addForce(force);
 
-    b2->addImpulse(vel * b2->getMass());
+    b2->addImpulse(vel * b2->getMass());*/
 }
 
 }

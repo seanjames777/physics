@@ -76,7 +76,7 @@ protected:
         auto sphereBody = std::make_shared<Body>();
         getSystem()->addBody(sphereBody);
         sphereBody->setPosition(cam->getPosition());
-        sphereBody->setVelocity(glm::normalize(cam->getTarget() - cam->getPosition()) * 100.0f);
+        sphereBody->setLinearVelocity(glm::normalize(cam->getTarget() - cam->getPosition()) * 100.0f);
         sphereBody->setCollisionShape(std::make_shared<SphereShape>(3.0f));
         sphereBody->setMass(5.0f);
         addMesh(std::make_shared<SphereMesh>(30, 15, 3.0f), sphereBody);
