@@ -19,6 +19,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <physics/collisionshape.h>
 
 using namespace std::placeholders;
 
@@ -63,8 +64,12 @@ std::shared_ptr<System> Demo::getSystem() {
     return system;
 }
 
-void Demo::addMesh(std::shared_ptr<Mesh> mesh) {
-    meshes.push_back(mesh);
+void Demo::addMesh(std::shared_ptr<Mesh> mesh, std::shared_ptr<Body> body) {
+    MeshBodyPair pair;
+    pair.mesh = mesh;
+    pair.body = body;
+
+    meshes.push_back(pair);
 }
 
 Demo::Demo(std::string title, int width, int height, int shadowSize)
@@ -127,6 +132,15 @@ Demo::Demo(std::string title, int width, int height, int shadowSize)
     stat = shadow_shader->link();
     assert(stat);
 
+    flat_shader = std::make_shared<Shader>();
+    stat = false;
+    stat = flat_shader->setVS("content/shaders/flat.vs");
+    assert(stat);
+    stat = flat_shader->setFS("content/shaders/flat.fs");
+    assert(stat);
+    stat = flat_shader->link();
+    assert(stat);
+
     camera = std::make_shared<Camera>(glm::vec3(), glm::vec3());
     camera->setAspectRatio((float)width / (float)height);
 
@@ -141,6 +155,8 @@ Demo::Demo(std::string title, int width, int height, int shadowSize)
     shadowTarget = std::make_shared<RenderTarget>(shadowSize, shadowSize, 0);
     shadowTarget->addColorTarget(GL_R32F, GL_LINEAR); // TODO format, filter
     shadowTarget->finish();
+
+    debug_mesh = std::make_shared<Mesh>();
 }
 
 void Demo::draw() {
@@ -164,9 +180,9 @@ void Demo::draw() {
     GLint lightWorldViewProjectionLocation = glGetUniformLocation(
         shadow_shader->getProgram(), "lightWorldViewProjection");
 
-    for (auto mesh : meshes) {
+    for (auto & pair : meshes) {
         // TODO redundant
-        glm::mat4 world = mesh->getTransform();
+        glm::mat4 world = pair.body->getTransform();
         glm::mat4 worldInverseTranspose = glm::inverse(glm::transpose(world));
         glm::mat4 worldViewProjection = camViewProjection * world;
         glm::mat4 lightWorldViewProjection = lightViewProjection * world;
@@ -178,7 +194,7 @@ void Demo::draw() {
         glUniformMatrix4fv(worldInverseTransposeLocation, 1, false,
             glm::value_ptr(worldInverseTranspose));
 
-        mesh->draw();
+        pair.mesh->draw();
     }
 
     shadow_shader->unbind();
@@ -210,9 +226,10 @@ void Demo::draw() {
 
     shadowTarget->bindColorTexture(0, 0);
 
-    for (auto mesh : meshes) {
+    for (auto & pair : meshes) {
         // TODO redundant
-        glm::mat4 world = mesh->getTransform();
+        glm::mat4 world = glm::translate(glm::mat4(), pair.body->getPosition());
+
         glm::mat4 worldInverseTranspose = glm::inverse(glm::transpose(world));
         glm::mat4 worldViewProjection = camViewProjection * world;
         glm::mat4 lightWorldViewProjection = lightViewProjection * world;
@@ -228,12 +245,27 @@ void Demo::draw() {
         glUniform3fv(lightDirectionLocation, 1,
             glm::value_ptr(lightDir));
 
-        mesh->draw();
+        pair.mesh->draw();
     }
 
     shadowTarget->unbindColorTexture(0);
 
     phong_shader->unbind();
+
+    prepDebug();
+
+    flat_shader->bind();
+    glDisable(GL_DEPTH_TEST);
+
+    GLuint viewProjectionLocation = glGetUniformLocation(
+        flat_shader->getProgram(), "viewProjection");
+    glUniformMatrix4fv(viewProjectionLocation, 1, false,
+            glm::value_ptr(camViewProjection));
+
+    debug_mesh->draw();
+
+    glEnable(GL_DEPTH_TEST);
+    flat_shader->unbind();
 
     //shadowTarget->blit(0, 0, 256, 256, 0);
 }
@@ -263,6 +295,142 @@ Demo::~Demo() {
     glfwDestroyWindow(window);
 
     glfwTerminate();
+}
+
+void Demo::prepDebug() {
+    std::vector<MeshVertex> vertices;
+    std::vector<int> indices;
+    MeshVertex vert;
+
+    for (auto & pair : meshes) {
+        glm::vec3 center = pair.body->getPosition();
+        const float diff = 0.5f;
+
+        int i0 = vertices.size();
+
+        vert.color = glm::vec3(1, 1, 0);
+        vert.position = center + glm::vec3(-diff, 0, 0);
+        vertices.push_back(vert);
+        vert.color = glm::vec3(1, 1, 0);
+        vert.position = center + glm::vec3(0, 0, 0);
+        vertices.push_back(vert);
+
+        vert.color = glm::vec3(1, 1, 0);
+        vert.position = center + glm::vec3(0, -diff, 0);
+        vertices.push_back(vert);
+        vert.color = glm::vec3(1, 1, 0);
+        vert.position = center + glm::vec3(0, 0, 0);
+        vertices.push_back(vert);
+
+        vert.color = glm::vec3(1, 1, 0);
+        vert.position = center + glm::vec3(0, 0, -diff);
+        vertices.push_back(vert);
+        vert.color = glm::vec3(1, 1, 0);
+        vert.position = center + glm::vec3(0, 0, 0);
+        vertices.push_back(vert);
+
+        vert.color = glm::vec3(1, 0, 0);
+        vert.position = center + glm::vec3(diff, 0, 0);
+        vertices.push_back(vert);
+        vert.color = glm::vec3(1, 0, 0);
+        vert.position = center + glm::vec3(0, 0, 0);
+        vertices.push_back(vert);
+
+        vert.color = glm::vec3(0, 1, 0);
+        vert.position = center + glm::vec3(0, diff, 0);
+        vertices.push_back(vert);
+        vert.color = glm::vec3(0, 1, 0);
+        vert.position = center + glm::vec3(0, 0, 0);
+        vertices.push_back(vert);
+
+        vert.color = glm::vec3(0, 0, 1);
+        vert.position = center + glm::vec3(0, 0, diff);
+        vertices.push_back(vert);
+        vert.color = glm::vec3(0, 0, 1);
+        vert.position = center + glm::vec3(0, 0, 0);
+        vertices.push_back(vert);
+
+        indices.push_back(i0 + 0);
+        indices.push_back(i0 + 1);
+        indices.push_back(i0 + 2);
+        indices.push_back(i0 + 3);
+        indices.push_back(i0 + 4);
+        indices.push_back(i0 + 5);
+        indices.push_back(i0 + 6);
+        indices.push_back(i0 + 7);
+        indices.push_back(i0 + 8);
+        indices.push_back(i0 + 9);
+        indices.push_back(i0 + 10);
+        indices.push_back(i0 + 11);
+
+        std::shared_ptr<CollisionShape> shape = pair.body->getCollisionShape();
+
+        if (!shape)
+            continue;
+
+        i0 = vertices.size();
+        vert.color = glm::vec3(1, 0, 0);
+
+        glm::vec3 min, max;
+        shape->getBoundingBox(pair.body.get(), min, max);
+
+        vert.position = glm::vec3(min.x, min.y, min.z);
+        vertices.push_back(vert);
+        vert.position = glm::vec3(max.x, min.y, min.z);
+        vertices.push_back(vert);
+        vert.position = glm::vec3(min.x, max.y, min.z);
+        vertices.push_back(vert);
+        vert.position = glm::vec3(max.x, max.y, min.z);
+        vertices.push_back(vert);
+        vert.position = glm::vec3(min.x, min.y, max.z);
+        vertices.push_back(vert);
+        vert.position = glm::vec3(max.x, min.y, max.z);
+        vertices.push_back(vert);
+        vert.position = glm::vec3(min.x, max.y, max.z);
+        vertices.push_back(vert);
+        vert.position = glm::vec3(max.x, max.y, max.z);
+        vertices.push_back(vert);
+
+        indices.push_back(i0 + 0);
+        indices.push_back(i0 + 1);
+
+        indices.push_back(i0 + 2);
+        indices.push_back(i0 + 3);
+
+        indices.push_back(i0 + 4);
+        indices.push_back(i0 + 5);
+
+        indices.push_back(i0 + 6);
+        indices.push_back(i0 + 7);
+
+        indices.push_back(i0 + 0);
+        indices.push_back(i0 + 2);
+
+        indices.push_back(i0 + 1);
+        indices.push_back(i0 + 3);
+
+        indices.push_back(i0 + 4);
+        indices.push_back(i0 + 6);
+
+        indices.push_back(i0 + 5);
+        indices.push_back(i0 + 7);
+
+        indices.push_back(i0 + 0);
+        indices.push_back(i0 + 4);
+
+        indices.push_back(i0 + 1);
+        indices.push_back(i0 + 5);
+
+        indices.push_back(i0 + 2);
+        indices.push_back(i0 + 6);
+
+        indices.push_back(i0 + 3);
+        indices.push_back(i0 + 7);
+    }
+
+    debug_mesh->setVertices(&vertices[0], vertices.size());
+    debug_mesh->setIndices(&indices[0], indices.size());
+    debug_mesh->setMode(GL_LINES); // TODO redundant
 }
 
 }}

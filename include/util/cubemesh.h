@@ -24,7 +24,7 @@ public:
      *
      * @param[in] shader Shader
      */
-    CubeMesh(std::shared_ptr<Body> body, float width, float height, float depth);
+    CubeMesh(float width, float height, float depth);
 
 };
 

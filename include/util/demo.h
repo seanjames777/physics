@@ -19,6 +19,7 @@ class GLFWwindow;
 namespace Physics {
 
 class System;
+class Body;
 
 namespace Util {
 
@@ -33,23 +34,30 @@ class Camera;
 class Demo {
 private:
 
+    struct MeshBodyPair {
+        std::shared_ptr<Mesh> mesh;
+        std::shared_ptr<Body> body;
+    };
+
     int                                 width;                 //!< Window width
     int                                 height;                //!< Window height
     int                                 shadowSize;            //!< Shadow map width and height
     GLFWwindow                         *window;                //!< GLFW window
     bool                                close;                 //!< Whether demo should exit
     std::shared_ptr<Shader>             phong_shader;          //!< Default object shader
-    std::shared_ptr<Shader>             shadow_shader;         //!< Default object shader
+    std::shared_ptr<Shader>             shadow_shader;         //!< Shadow map shader
+    std::shared_ptr<Shader>             flat_shader;           //!< Vertex color shader
     std::shared_ptr<Camera>             camera;                //!< Camera
     std::shared_ptr<System>             system;                //!< Physics system
     double                              time;                  //!< Current time
-    std::vector<std::shared_ptr<Mesh>>  meshes;                //!< List of meshes to draw
+    std::vector<MeshBodyPair>           meshes;                //!< List of meshes to draw
     glm::vec3                           lightDir;              //!< Global light direction
     float                               shadowBounds;          //!< Shadow view rectangle width/height
     float                               shadowNear;            //!< Shadow near plane
     float                               shadowFar;             //!< Shadow far plane
     glm::mat4                           lightViewProjection;   //!< Shadow view * projectionm matrix
     std::shared_ptr<RenderTarget>       shadowTarget;          //!< Shadow render target
+    std::shared_ptr<Mesh>               debug_mesh;            //!< Debug visualization mesh
 
     /**
      * @brief Handle window resize events
@@ -80,6 +88,11 @@ private:
      */
     void draw();
 
+    /**
+     * @brief Construct debug_mesh
+     */
+    void prepDebug();
+
 protected:
 
     /**
@@ -108,9 +121,11 @@ protected:
     std::shared_ptr<System> getSystem();
 
     /**
-     * @brief Add a mesh to the list of meshes to draw
+     * @brief Add a mesh to the list of meshes to draw. It will be drawn at
+     * the location of the given body. Meshes may be added more than once
+     * with different bodies. TODO params.
      */
-    void addMesh(std::shared_ptr<Mesh> mesh);
+    void addMesh(std::shared_ptr<Mesh> mesh, std::shared_ptr<Body> body);
 
 public:
 

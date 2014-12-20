@@ -42,7 +42,7 @@ protected:
         quadBody->setPosition(glm::vec3(0, 0, 0));
         quadBody->setFixed(true);
         quadBody->setCollisionShape(std::make_shared<PlaneShape>(glm::vec3(0, 1, 0), 0));
-        addMesh(std::make_shared<PlaneMesh>(quadBody, 20, 10));
+        addMesh(std::make_shared<PlaneMesh>(40, 40), quadBody);
         system->addBody(quadBody);
 
         int N = 14;
@@ -62,7 +62,7 @@ protected:
                 if (j == 0 && (i == 0 || i == N - j - 1))
                     sphereBody->setFixed(true);
 
-                addMesh(std::make_shared<CubeMesh>(sphereBody, 1, 1, 1));
+                addMesh(std::make_shared<CubeMesh>(1, 1, 1), sphereBody);
             }
         }
 
@@ -79,7 +79,7 @@ protected:
         sphereBody->setVelocity(glm::normalize(cam->getTarget() - cam->getPosition()) * 100.0f);
         sphereBody->setCollisionShape(std::make_shared<SphereShape>(3.0f));
         sphereBody->setMass(5.0f);
-        addMesh(std::make_shared<SphereMesh>(sphereBody, 30, 15, 3.0f));
+        addMesh(std::make_shared<SphereMesh>(30, 15, 3.0f), sphereBody);
     }
 
     virtual void destroy_demo() override {

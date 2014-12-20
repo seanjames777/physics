@@ -8,9 +8,8 @@
 
 namespace Physics { namespace Util {
 
-CubeMesh::CubeMesh(std::shared_ptr<Body> body, float width, float height,
+CubeMesh::CubeMesh(float width, float height,
     float depth)
-    : Mesh(body)
 {
     MeshVertex vertices[24];
     int indices[36];

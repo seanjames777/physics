@@ -13,6 +13,7 @@ out vec4 out_color;
 void main() {
     // Clamp allows us to use CLAMP_TO_EDGE as a hack for regions outside shadow map
     float actual_depth = clamp(var_lightPosition.z / var_lightPosition.w, -1.0, 1.0);
+    actual_depth -= 1.0 / 100.0;
 
     vec2 shadow_uv = var_lightPosition.xy / var_lightPosition.w;
     shadow_uv = shadow_uv * 0.5 + 0.5;

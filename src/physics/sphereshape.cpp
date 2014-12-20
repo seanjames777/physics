@@ -61,4 +61,12 @@ void SphereShape::checkCollision(CollisionShape *other, Body *b1, Body *b2,
     }
 }
 
+void SphereShape::getBoundingBox(Body *body, glm::vec3 & min, glm::vec3 & max) {
+    glm::vec3 position = body->getPosition();
+    glm::vec3 rad = glm::vec3(r, r, r);
+
+    min = position - rad;
+    max = position + rad;
+}
+
 }

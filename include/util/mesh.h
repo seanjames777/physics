@@ -23,6 +23,7 @@ struct MeshVertex {
     glm::vec3 position;
     glm::vec3 normal;
     glm::vec2 uv;
+    glm::vec3 color;
 };
 
 /**
@@ -31,23 +32,23 @@ struct MeshVertex {
 class Mesh {
 private:
 
-    GLuint                  vb;
-    GLuint                  ib;
-    GLuint                  vao;
-    std::shared_ptr<Body>   body;
-    int                     nIndices;
+    GLuint vb;
+    GLuint ib;
+    GLuint vao;
+    int    nIndices;
+    GLenum mode;
 
 public:
 
-    Mesh(std::shared_ptr<Body> body);
+    Mesh();
 
     virtual ~Mesh();
-
-    glm::mat4 getTransform();
 
     void setVertices(MeshVertex *vertices, int nVertices);
 
     void setIndices(int *indices, int nIndices);
+
+    void setMode(GLenum mode);
 
     void draw();
 

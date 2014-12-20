@@ -34,6 +34,8 @@ public:
     virtual void checkCollision(CollisionShape *other, Body *b1, Body *b2,
         std::vector<Contact> & contacts) = 0;
 
+    virtual void getBoundingBox(Body *body, glm::vec3 & min, glm::vec3 & max) = 0;
+
 };
 
 }

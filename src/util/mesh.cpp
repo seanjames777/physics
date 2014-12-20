@@ -5,15 +5,16 @@
  */
 
 #include <util/mesh.h>
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace Physics { namespace Util {
 
-Mesh::Mesh(std::shared_ptr<Body> body)
+Mesh::Mesh()
     : vb(0),
       ib(0),
       vao(0),
-      body(body),
-      nIndices(0)
+      nIndices(0),
+      mode(GL_TRIANGLES)
 {
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
@@ -38,6 +39,10 @@ Mesh::Mesh(std::shared_ptr<Body> body)
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(MeshVertex), offset);
     offset += sizeof(float) * 2;
 
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(MeshVertex), offset);
+    offset += sizeof(float) * 3;
+
     glBindVertexArray(0);
 }
 
@@ -45,10 +50,6 @@ Mesh::~Mesh() {
     glDeleteBuffers(1, &vb);
     glDeleteBuffers(1, &ib);
     glDeleteVertexArrays(1, &vao);
-}
-
-glm::mat4 Mesh::getTransform() {
-    return body->getTransform();
 }
 
 void Mesh::setVertices(MeshVertex *vertices, int nVertices) {
@@ -66,9 +67,13 @@ void Mesh::setIndices(int *indices, int nIndices) {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
+void Mesh::setMode(GLenum mode) {
+    this->mode = mode;
+}
+
 void Mesh::draw() {
     glBindVertexArray(vao);
-    glDrawElements(GL_TRIANGLES, nIndices, GL_UNSIGNED_INT, NULL);
+    glDrawElements(mode, nIndices, GL_UNSIGNED_INT, NULL);
     glBindVertexArray(0); // TODO
 }
 

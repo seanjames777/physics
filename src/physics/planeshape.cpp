@@ -49,4 +49,9 @@ void PlaneShape::checkCollision(CollisionShape *other, Body *b1, Body *b2,
     }
 }
 
+void PlaneShape::getBoundingBox(Body *body, glm::vec3 & min, glm::vec3 & max) {
+    min = glm::vec3(-1.0 / 0.0, 0.0f, -1.0 / 0.0); // TODO
+    min = glm::vec3( 1.0 / 0.0, 0.0f,  1.0 / 0.0);
+}
+
 }
