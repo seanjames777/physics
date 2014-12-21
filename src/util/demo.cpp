@@ -12,7 +12,7 @@
 #include <cassert>
 #include <sys/time.h>
 #include <util/graphics/mesh.h>
-#include <util/graphics/camera.h>
+#include <util/graphics/fpscamera.h>
 #include <util/graphics/shader.h>
 #include <util/graphics/rendertarget.h>
 #include <physics/system.h>
@@ -49,16 +49,69 @@ void Demo::resizeHandler(GLFWwindow *window, int width, int height) {
     demo->camera->setAspectRatio((float)width / (float)height);
 }
 
-void Demo::mouseHandler(GLFWwindow *window, int button, int action, int mods) {
-    if (action != GLFW_PRESS)
-        return;
-
+void Demo::mouseButtonHandler(GLFWwindow *window, int button, int action, int mods) {
     Demo *demo = (Demo *)glfwGetWindowUserPointer(window);
 
-    demo->demo_mouseDown(button);
+    int mask = 1 << button;
+
+    if (action == GLFW_PRESS) {
+        demo->mouseButtons |= mask;
+        demo->demo_mouseDown(button);
+    }
+    else if (action == GLFW_RELEASE) {
+        demo->mouseButtons &= ~mask;
+    }
+    // TODO else {}
 }
 
-std::shared_ptr<Camera> Demo::getCamera() {
+void Demo::mouseMoveHandler(GLFWwindow *window, double x, double y) {
+    Demo *demo = (Demo *)glfwGetWindowUserPointer(window);
+
+    const float sensitivity = 0.1f;
+    float dx = x - demo->mouseX;
+    float dy = y - demo->mouseY;
+
+    // TODO should just load at beginning. same for buttons.
+    if (demo->mouseX != 0 && demo->mouseY != 0 && (demo->mouseButtons & (1 << 0))) {
+        demo->camera->setYaw(demo->camera->getYaw() - dx * sensitivity);
+        demo->camera->setPitch(demo->camera->getPitch() + dy * sensitivity);
+    }
+
+    demo->mouseX = x;
+    demo->mouseY = y;
+}
+
+void Demo::keyHandler(GLFWwindow *window, int key, int scanCode, int action, int mods) {
+    Demo *demo = (Demo *)glfwGetWindowUserPointer(window);
+
+    int bucket = key / sizeof(int);
+    int idx = key % sizeof(int);
+
+    if (action == GLFW_PRESS) {
+        demo->keys[bucket] |= (1 << idx);
+
+        if (key == GLFW_KEY_SPACE) {
+            demo->pausePhysics = !demo->pausePhysics;
+            demo->system->setTimeWarp(demo->pausePhysics ? 0.0 : demo->timeWarp);
+        }
+        else if (key == GLFW_KEY_LEFT_BRACKET || key == GLFW_KEY_RIGHT_BRACKET) {
+            demo->timeWarp += (key == GLFW_KEY_LEFT_BRACKET ? -0.05 : 0.05);
+            demo->system->setTimeWarp(demo->pausePhysics ? 0.0 : demo->timeWarp);
+        }
+    }
+    else if (action == GLFW_RELEASE) {
+        demo->keys[bucket] &= ~(1 << idx);
+    }
+}
+
+bool Demo::isKeyDown(int key) {
+    int bucket = key / sizeof(int);
+    int idx = key % sizeof(int);
+
+    return (keys[bucket] & (1 << idx)) ? true : false;
+}
+
+std::shared_ptr<FPSCamera> Demo::getCamera() {
     return camera;
 }
 
@@ -74,7 +127,7 @@ void Demo::addMesh(std::shared_ptr<Mesh> mesh, std::shared_ptr<Body> body) {
     meshes.push_back(pair);
 }
 
-Demo::Demo(std::string title, int width, int height, int shadowSize)
+Demo::Demo(std::string title, int width, int height, int shadowSize, bool vsync)
     : width(width),
       height(height),
       shadowSize(shadowSize),
@@ -94,7 +147,12 @@ Demo::Demo(std::string title, int width, int height, int shadowSize)
       shadowTarget(nullptr),
       frameTime(0.0),
       physicsTime(0.0),
-      nFrames(0)
+      nFrames(0),
+      mouseX(0),
+      mouseY(0),
+      mouseButtons(0),
+      timeWarp(1.0),
+      pausePhysics(false)
 {
     glfwInit();
 
@@ -110,7 +168,9 @@ Demo::Demo(std::string title, int width, int height, int shadowSize)
 
     glfwSetWindowUserPointer(window, this);
     glfwSetWindowSizeCallback(window, resizeHandler);
-    glfwSetMouseButtonCallback(window, mouseHandler);
+    glfwSetMouseButtonCallback(window, mouseButtonHandler);
+    glfwSetCursorPosCallback(window, mouseMoveHandler);
+    glfwSetKeyCallback(window, keyHandler);
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
@@ -122,7 +182,7 @@ Demo::Demo(std::string title, int width, int height, int shadowSize)
     glDisable(GL_CULL_FACE); // TODO
     //glEnable(GL_MULTISAMPLE);
 
-    glfwSwapInterval(1);
+    glfwSwapInterval(vsync ? 1 : 0);
 
     phong_shader = std::make_shared<Shader>();
     bool stat = false;
@@ -151,7 +211,7 @@ Demo::Demo(std::string title, int width, int height, int shadowSize)
     stat = flat_shader->link();
     assert(stat);
 
-    camera = std::make_shared<Camera>(glm::vec3(), glm::vec3());
+    camera = std::make_shared<FPSCamera>(glm::vec3(), 0, 0);
     camera->setAspectRatio((float)width / (float)height);
 
     system = std::make_shared<System>();
@@ -169,6 +229,8 @@ Demo::Demo(std::string title, int width, int height, int shadowSize)
     debug_mesh = std::make_shared<Mesh>();
 
     font = std::make_shared<Font>("content/fonts/consolas_bold.ttf", 0, 12);
+
+    memset(keys, 0, sizeof(keys));
 }
 
 void Demo::draw() {
@@ -302,10 +364,14 @@ void Demo::draw() {
             "      Bodies: %ld\n"
             "  Frame Time: %.02f ms\n"
             "Physics Time: %.02f ms\n"
-            , contacts.size(), bodies.size(), frameTime, physicsTime);
+            "   Time Warp: %.02f\n"
+            "%s"
+            , contacts.size(), bodies.size(), frameTime, physicsTime, timeWarp,
+            pausePhysics ? "Simulation paused\n" : "");
 
         frameTime = 0;
         physicsTime = 0;
+        nFrames = 0;
     }
 
     font->drawString(debug_buff, 10, 10);
@@ -314,28 +380,51 @@ void Demo::draw() {
     //shadowTarget->blit(0, 0, 256, 256, 0);
 }
 
+void Demo::updateCamera(double dt) {
+    glm::vec3 local;
+
+    if (isKeyDown(GLFW_KEY_W))
+        local += glm::vec3(0, 0, 1);
+    if (isKeyDown(GLFW_KEY_S))
+        local += glm::vec3(0, 0, -1);
+    if (isKeyDown(GLFW_KEY_A))
+        local += glm::vec3(-1, 0, 0);
+    if (isKeyDown(GLFW_KEY_D))
+        local += glm::vec3(1, 0, 0);
+
+    glm::vec3 global =
+        local.x * camera->getRight() +
+        local.z * camera->getForward();
+
+    const float camSpeed = 40.0f * dt;
+
+    camera->setPosition(camSpeed * global + camera->getPosition());
+}
+
 void Demo::run() {
     init_demo();
 
     time = getTime();
 
     while (!glfwWindowShouldClose(window) && !close) {
-        double frameStart = getTime();
-
-        glfwPollEvents();
-
         double newTime = getTime();
         double elapsed = newTime - time;
         time = newTime;
 
+        glfwPollEvents();
+
         system->integrate(newTime, elapsed);
         physicsTime += getTime() - newTime;
 
+        updateCamera(elapsed);
+
         draw();
+
+        glFinish();
 
         glfwSwapBuffers(window);
 
-        frameTime += getTime() - frameStart;
+        frameTime += getTime() - newTime;
         nFrames++;
     }
 

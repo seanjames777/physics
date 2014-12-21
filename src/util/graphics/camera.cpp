@@ -12,6 +12,9 @@ namespace Physics { namespace Util {
 void Camera::updateView() {
     view = glm::lookAt(position, target, up);
     viewProjection = projection * view;
+
+    forward = glm::normalize(target - position);
+    right = glm::cross(forward, up);
 }
 
 void Camera::updateProjection() {
@@ -56,6 +59,18 @@ glm::vec3 Camera::getPosition() {
 
 glm::vec3 Camera::getTarget() {
     return target;
+}
+
+glm::vec3 Camera::getForward() {
+    return forward;
+}
+
+glm::vec3 Camera::getUp() {
+    return up;
+}
+
+glm::vec3 Camera::getRight() {
+    return right;
 }
 
 void Camera::setPosition(glm::vec3 position) {

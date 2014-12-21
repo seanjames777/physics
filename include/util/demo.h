@@ -27,8 +27,10 @@ namespace Util {
 class Mesh;
 class RenderTarget;
 class Shader;
-class Camera;
+class FPSCamera;
 class Font;
+
+#define MAX_KEY (11*32)
 
 /**
  * @brief Demo application base class
@@ -50,7 +52,7 @@ private:
     std::shared_ptr<Shader>             shadow_shader;         //!< Shadow map shader
     std::shared_ptr<Shader>             flat_shader;           //!< Vertex color shader
     std::shared_ptr<Font>               font;                  //!< Debug display font
-    std::shared_ptr<Camera>             camera;                //!< Camera
+    std::shared_ptr<FPSCamera>          camera;                //!< Camera
     std::shared_ptr<System>             system;                //!< Physics system
     double                              time;                  //!< Current time
     double                              debug_time;            //!< Time debug string last updated
@@ -66,6 +68,12 @@ private:
     double                              frameTime;             //!< Accumulated frame time
     double                              physicsTime;           //!< Accumulated physics time
     int                                 nFrames;               //!< Accumulated frame count
+    double                              mouseX;                //!< Mouse X coordinate
+    double                              mouseY;                //!< Mouse Y coordinate
+    int                                 mouseButtons;          //!< Pressed mouse buttons
+    double                              timeWarp;              //!< Physics time scale
+    bool                                pausePhysics;          //!< Whether simulation is paused
+    int                                 keys[MAX_KEY / sizeof(int)]; //!< TODO
 
     /**
      * @brief Handle window resize events
@@ -77,14 +85,34 @@ private:
     static void resizeHandler(GLFWwindow *window, int width, int height);
 
     /**
-     * @brief Handle mouse events
+     * @brief Handle mouse button events
      *
      * @param[in] window Window that received event
      * @param[in] button Mouse button
      * @param[in] action Action: press or release
      * @param[in] mods   Modifier keys
      */
-    static void mouseHandler(GLFWwindow *window, int button, int action, int mods);
+    static void mouseButtonHandler(GLFWwindow *window, int button, int action, int mods);
+
+    /**
+     * @brief Handle mouse movement events
+     *
+     * @param[in] window Window that received event
+     * @param[in] x      Mouse X coordinate
+     * @param[in] y      Mouse Y coordinate
+     */
+    static void mouseMoveHandler(GLFWwindow *window, double x, double y);
+
+    /**
+     * @brief Keyboard button handler
+     *
+     * @param[in] window   Window that received event
+     * @param[in] key      GLFW key code
+     * @param[in] scanCode System key code
+     * @param[in] action   Action: press or release
+     * @param[in] mods     Modifier keys
+     */
+    static void keyHandler(GLFWwindow *window, int key, int scanCode, int action, int mods);
 
     /**
      * @brief Get current time in seconds
@@ -100,6 +128,18 @@ private:
      * @brief Construct debug_mesh
      */
     void prepDebug();
+
+    /**
+     * @brief Check whether a key is down
+     *
+     * @param[in] key GLFW key code
+     */
+    bool isKeyDown(int key);
+
+    /**
+     * @brief Update camera position based on WSAD keys
+     */
+    void updateCamera(double dt);
 
 protected:
 
@@ -121,7 +161,7 @@ protected:
     /**
      * @brief Get the camera
      */
-    std::shared_ptr<Camera> getCamera();
+    std::shared_ptr<FPSCamera> getCamera();
 
     /**
      * @brief Get physics system
@@ -141,7 +181,7 @@ public:
      * @brief Constructor
      */
     Demo(std::string title = "Physics Demo", int width = 1024,
-        int height = 768, int shadowSize = 1024);
+        int height = 768, int shadowSize = 1024, bool vsync = true);
 
     /**
      * @brief Run demo to completion

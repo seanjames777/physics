@@ -22,6 +22,7 @@ add_library(util
     src/util/graphics/camera.cpp
     src/util/graphics/cubemesh.cpp
     src/util/graphics/font.cpp
+    src/util/graphics/fpscamera.cpp
     src/util/graphics/mesh.cpp
     src/util/graphics/planemesh.cpp
     src/util/graphics/rendertarget.cpp

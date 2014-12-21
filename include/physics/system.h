@@ -49,6 +49,10 @@ public:
 
     void addConstraint(std::shared_ptr<Constraint> constraint);
 
+    double getTimeWarp();
+
+    void setTimeWarp(double timeWarp);
+
     // TODO: in seconds
     void integrate(double t, double dt);
 

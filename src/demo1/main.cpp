@@ -10,7 +10,7 @@
 #include <util/graphics/planemesh.h>
 #include <util/graphics/spheremesh.h>
 #include <util/graphics/cubemesh.h>
-#include <util/graphics/camera.h>
+#include <util/graphics/fpscamera.h>
 #include <physics/constraints/springconstraint.h>
 #include <physics/constraints/rodconstraint.h>
 #include <physics/collision/sphereshape.h>
@@ -34,7 +34,7 @@ protected:
     // TODO: constraints that don't require extra bodies
 
     virtual void init_demo() override {
-        std::shared_ptr<Camera> cam = getCamera();
+        std::shared_ptr<FPSCamera> cam = getCamera();
         std::shared_ptr<System> system = getSystem();
 
         // Ground plane
@@ -67,7 +67,9 @@ protected:
         }
 
         cam->setPosition(glm::vec3(10, 20, 40));
-        cam->setTarget(glm::vec3(0, N * R, 0));
+        cam->setYaw(193);
+        cam->setPitch(10);
+        //cam->setTarget(glm::vec3(0, N * R, 0));
 
         auto sphereBody = std::make_shared<Body>();
         getSystem()->addBody(sphereBody);
@@ -85,15 +87,17 @@ protected:
     }
 
     virtual void demo_mouseDown(int button) {
-        std::shared_ptr<Camera> cam = getCamera();
+        if (button == 1) {
+            std::shared_ptr<Camera> cam = getCamera();
 
-        auto sphereBody = std::make_shared<Body>();
-        getSystem()->addBody(sphereBody);
-        sphereBody->setPosition(cam->getPosition());
-        sphereBody->setLinearVelocity(glm::normalize(cam->getTarget() - cam->getPosition()) * 100.0f);
-        sphereBody->setCollisionShape(std::make_shared<SphereShape>(3.0f));
-        sphereBody->setMass(5.0f);
-        addMesh(std::make_shared<SphereMesh>(30, 15, 3.0f), sphereBody);
+            auto sphereBody = std::make_shared<Body>();
+            getSystem()->addBody(sphereBody);
+            sphereBody->setPosition(cam->getPosition());
+            sphereBody->setLinearVelocity(glm::normalize(cam->getTarget() - cam->getPosition()) * 100.0f);
+            sphereBody->setCollisionShape(std::make_shared<SphereShape>(3.0f));
+            sphereBody->setMass(5.0f);
+            addMesh(std::make_shared<SphereMesh>(30, 15, 3.0f), sphereBody);
+        }
     }
 
     virtual void destroy_demo() override {

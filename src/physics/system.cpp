@@ -27,7 +27,7 @@ System::System()
     : gravity(glm::vec3(0, -9.8f, 0)),
       step(1.0 / 60.0),
       time(0.0),
-      timeWarp(0.5),
+      timeWarp(1.0),
       accumTime(0.0)
 {
 }
@@ -49,6 +49,14 @@ void System::addBody(std::shared_ptr<Body> body) {
 
 void System::addConstraint(std::shared_ptr<Constraint> constraint) {
     constraints.push_back(constraint);
+}
+
+double System::getTimeWarp() {
+    return timeWarp;
+}
+
+void System::setTimeWarp(double timeWarp) {
+    this->timeWarp = timeWarp;
 }
 
 // TODO: Switch to addVelocity() to avoid constantly mul/div mass
