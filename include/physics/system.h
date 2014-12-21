@@ -19,6 +19,8 @@ class Body;
 class Constraint;
 class Contact;
 
+// TODO: Using shared pointer everywhere might hurt perf
+
 /**
  * @brief Physics system, which tracks bodies that may interact, and integrates
  * their motion and forces.
@@ -33,6 +35,7 @@ private:
     double accumTime;
     double time;
     double timeWarp; // TODO doubles are too big maybe
+    std::vector<Contact> contacts;
 
     void resolveContact(Contact & contact);
 
@@ -52,6 +55,10 @@ public:
     glm::vec3 getGravity();
 
     void setGravity(glm::vec3 gravity);
+
+    std::vector<Contact> & getContacts(); // TODO
+
+    std::vector<std::shared_ptr<Body>> & getBodies();
 
 };
 

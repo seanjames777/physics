@@ -4,10 +4,10 @@
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#include <physics/sphereshape.h>
+#include <physics/collision/sphereshape.h>
 #include <iostream> // TODO
-#include <physics/body.h>
-#include <physics/planeshape.h>
+#include <physics/dynamics/body.h>
+#include <physics/collision/planeshape.h>
 
 namespace Physics {
 
@@ -40,7 +40,7 @@ void SphereShape::checkCollision(CollisionShape *other, Body *b1, Body *b2,
             contact.b2 = b2;
             contact.normal = norm;
             contact.depth = r + other_sphere->r - dist;
-            //contact.position = b1->getPosition() + norm * dist; // TODO
+            contact.position = b2->getPosition() + norm * other_sphere->r;
 
             contacts.push_back(contact);
         }
@@ -49,12 +49,15 @@ void SphereShape::checkCollision(CollisionShape *other, Body *b1, Body *b2,
         glm::vec3 p1 = b1->getPosition();
         float dist = glm::dot(p1, other_plane->getNormal()) - other_plane->getDistance();
 
+        // TODO obviously move collisions into a single place
+        // TODO decide on direction of normal and depth
+
         if (dist < r) {
             contact.b1 = b1;
             contact.b2 = b2;
             contact.normal = other_plane->getNormal();
             contact.depth = r - dist;
-            //contact.position = b1->getPosition() + norm * dist; // TODO
+            contact.position = b1->getPosition() - contact.normal * dist;
 
             contacts.push_back(contact);
         }

@@ -4,7 +4,7 @@
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#include <physics/constraint.h>
+#include <physics/constraints/constraint.h>
 
 namespace Physics {
 

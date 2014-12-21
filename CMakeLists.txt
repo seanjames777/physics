@@ -4,39 +4,44 @@ project(physics)
 include_directories(include/)
 
 set(CMAKE_CXX_FLAGS "-std=c++11 -fno-exceptions -O3")
+set(CMAKE_CXX_FLAGS "-I/opt/local/include/freetype2/ ${CMAKE_CXX_FLAGS}")
 
 add_library(physics
-    src/physics/body.cpp
+    src/physics/collision/planeshape.cpp
+    src/physics/collision/shape.cpp
+    src/physics/collision/sphereshape.cpp
+    src/physics/constraints/constraint.cpp
+    src/physics/constraints/rodconstraint.cpp
+    src/physics/constraints/springconstraint.cpp
+    src/physics/dynamics/body.cpp
     src/physics/system.cpp
-    src/physics/constraint.cpp
-    src/physics/rodconstraint.cpp
-    src/physics/springconstraint.cpp
-    src/physics/collisionshape.cpp
-    src/physics/sphereshape.cpp
-    src/physics/planeshape.cpp
 )
 
 add_library(util
-    src/util/camera.cpp
-    src/util/shader.cpp
-    src/util/rendertarget.cpp
-    src/util/mesh.cpp
-    src/util/planemesh.cpp
-    src/util/spheremesh.cpp
-    src/util/cubemesh.cpp
     src/util/demo.cpp
+    src/util/graphics/camera.cpp
+    src/util/graphics/cubemesh.cpp
+    src/util/graphics/font.cpp
+    src/util/graphics/mesh.cpp
+    src/util/graphics/planemesh.cpp
+    src/util/graphics/rendertarget.cpp
+    src/util/graphics/shader.cpp
+    src/util/graphics/spheremesh.cpp
 )
 
 add_executable(demo1
     src/demo1/main.cpp
 )
 
+# TODO: most of these should actually be linked by libutil
 target_link_libraries(demo1
     physics
     util
     -framework\ OpenGL
     -lglew
     -lglfw
+    -L/opt/local/lib/
+    -lfreetype
 )
 
 install(TARGETS demo1 DESTINATION bin/)
@@ -47,3 +52,6 @@ install(FILES content/shaders/shadow.vs DESTINATION bin/content/shaders/)
 install(FILES content/shaders/shadow.fs DESTINATION bin/content/shaders/)
 install(FILES content/shaders/flat.vs DESTINATION bin/content/shaders/)
 install(FILES content/shaders/flat.fs DESTINATION bin/content/shaders/)
+install(FILES content/shaders/font.vs DESTINATION bin/content/shaders/)
+install(FILES content/shaders/font.fs DESTINATION bin/content/shaders/)
+install(FILES content/fonts/consolas_bold.ttf DESTINATION bin/content/fonts/)

@@ -4,7 +4,7 @@
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#include <util/rendertarget.h>
+#include <util/graphics/rendertarget.h>
 #include <cassert>
 #include <iostream> // TODO
 

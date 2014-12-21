@@ -11,8 +11,7 @@
 
 #include <GL/glew.h>
 #include <glm/glm.hpp>
-#include <util/shader.h>
-#include <physics/body.h>
+#include <util/graphics/shader.h>
 
 namespace Physics { namespace Util {
 
@@ -23,7 +22,7 @@ struct MeshVertex {
     glm::vec3 position;
     glm::vec3 normal;
     glm::vec2 uv;
-    glm::vec3 color;
+    glm::vec4 color;
 };
 
 /**

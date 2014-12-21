@@ -4,7 +4,7 @@
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#include <physics/rodconstraint.h>
+#include <physics/constraints/rodconstraint.h>
 #include <iostream>
 
 namespace Physics {

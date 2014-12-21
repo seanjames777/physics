@@ -4,10 +4,10 @@
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#include <physics/planeshape.h>
-#include <physics/sphereshape.h>
+#include <physics/collision/planeshape.h>
+#include <physics/collision/sphereshape.h>
 #include <iostream> // TODO
-#include <physics/body.h>
+#include <physics/dynamics/body.h>
 
 namespace Physics {
 
@@ -42,7 +42,7 @@ void PlaneShape::checkCollision(CollisionShape *other, Body *b1, Body *b2,
             contact.b2 = b1;
             contact.normal = normal;
             contact.depth = other_sphere->getRadius() - dist2;
-            //contact.position = b1->getPosition() + norm * dist; // TODO
+            contact.position = b2->getPosition() - normal * dist2;
 
             contacts.push_back(contact);
         }

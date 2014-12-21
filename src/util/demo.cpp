@@ -11,15 +11,17 @@
 #include <iostream>
 #include <cassert>
 #include <sys/time.h>
-#include <util/mesh.h>
-#include <util/camera.h>
-#include <util/shader.h>
-#include <util/rendertarget.h>
+#include <util/graphics/mesh.h>
+#include <util/graphics/camera.h>
+#include <util/graphics/shader.h>
+#include <util/graphics/rendertarget.h>
 #include <physics/system.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <physics/collisionshape.h>
+#include <physics/collision/shape.h>
+#include <physics/dynamics/body.h>
+#include <util/graphics/font.h>
 
 using namespace std::placeholders;
 
@@ -80,14 +82,19 @@ Demo::Demo(std::string title, int width, int height, int shadowSize)
       close(false),
       phong_shader(nullptr),
       shadow_shader(nullptr),
+      font(nullptr),
       camera(nullptr),
       system(nullptr),
       time(0.0),
+      debug_time(0.0),
       lightDir(glm::normalize(glm::vec3(0.8f, 1.0f, 0.6f))),
       shadowBounds(50.0f),
       shadowNear(-50.0f),
       shadowFar(50.0f),
-      shadowTarget(nullptr)
+      shadowTarget(nullptr),
+      frameTime(0.0),
+      physicsTime(0.0),
+      nFrames(0)
 {
     glfwInit();
 
@@ -99,12 +106,13 @@ Demo::Demo(std::string title, int width, int height, int shadowSize)
     glfwWindowHint(GLFW_DEPTH_BITS, 24);
 
     window = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
+    glfwMakeContextCurrent(window);
 
     glfwSetWindowUserPointer(window, this);
     glfwSetWindowSizeCallback(window, resizeHandler);
     glfwSetMouseButtonCallback(window, mouseHandler);
 
-    glfwMakeContextCurrent(window);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
     glewExperimental = true;
     glewInit();
@@ -113,6 +121,8 @@ Demo::Demo(std::string title, int width, int height, int shadowSize)
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE); // TODO
     //glEnable(GL_MULTISAMPLE);
+
+    glfwSwapInterval(1);
 
     phong_shader = std::make_shared<Shader>();
     bool stat = false;
@@ -157,6 +167,8 @@ Demo::Demo(std::string title, int width, int height, int shadowSize)
     shadowTarget->finish();
 
     debug_mesh = std::make_shared<Mesh>();
+
+    font = std::make_shared<Font>("content/fonts/consolas_bold.ttf", 0, 12);
 }
 
 void Demo::draw() {
@@ -267,6 +279,38 @@ void Demo::draw() {
     glEnable(GL_DEPTH_TEST);
     flat_shader->unbind();
 
+    if (time - debug_time > 1.0) {
+        debug_time = time;
+
+        std::vector<Contact> & contacts = system->getContacts();
+        std::vector<std::shared_ptr<Body>> & bodies = system->getBodies();
+
+        if (nFrames > 0) {
+            frameTime /= nFrames;
+            physicsTime /= nFrames;
+        }
+        else {
+            frameTime = 0.0;
+            physicsTime = 0.0;
+        }
+
+        frameTime *= 1000.0;
+        physicsTime *= 1000.0;
+
+        sprintf(debug_buff,
+            "    Contacts: %ld\n"
+            "      Bodies: %ld\n"
+            "  Frame Time: %.02f ms\n"
+            "Physics Time: %.02f ms\n"
+            , contacts.size(), bodies.size(), frameTime, physicsTime);
+
+        frameTime = 0;
+        physicsTime = 0;
+    }
+
+    font->drawString(debug_buff, 10, 10);
+    font->flush(width, height);
+
     //shadowTarget->blit(0, 0, 256, 256, 0);
 }
 
@@ -276,16 +320,23 @@ void Demo::run() {
     time = getTime();
 
     while (!glfwWindowShouldClose(window) && !close) {
+        double frameStart = getTime();
+
         glfwPollEvents();
 
         double newTime = getTime();
         double elapsed = newTime - time;
         time = newTime;
+
         system->integrate(newTime, elapsed);
+        physicsTime += getTime() - newTime;
 
         draw();
 
         glfwSwapBuffers(window);
+
+        frameTime += getTime() - frameStart;
+        nFrames++;
     }
 
     destroy_demo();
@@ -311,50 +362,49 @@ void Demo::prepDebug() {
 
     for (auto & pair : meshes) {
         const float diff = 0.5f;
-
         int i0 = vertices.size();
 
         glm::mat4 world = pair.body->getTransform();
 
-        vert.color = glm::vec3(1, 1, 0);
+        vert.color = glm::vec4(1, 1, 0, 1);
         vert.position = transform(world, glm::vec3(-diff, 0, 0));
         vertices.push_back(vert);
-        vert.color = glm::vec3(1, 1, 0);
+        vert.color = glm::vec4(1, 1, 0, 1);
         vert.position = transform(world, glm::vec3(0, 0, 0));
         vertices.push_back(vert);
 
-        vert.color = glm::vec3(1, 1, 0);
+        vert.color = glm::vec4(1, 1, 0, 1);
         vert.position = transform(world, glm::vec3(0, -diff, 0));
         vertices.push_back(vert);
-        vert.color = glm::vec3(1, 1, 0);
+        vert.color = glm::vec4(1, 1, 0, 1);
         vert.position = transform(world, glm::vec3(0, 0, 0));
         vertices.push_back(vert);
 
-        vert.color = glm::vec3(1, 1, 0);
+        vert.color = glm::vec4(1, 1, 0, 1);
         vert.position = transform(world, glm::vec3(0, 0, -diff));
         vertices.push_back(vert);
-        vert.color = glm::vec3(1, 1, 0);
+        vert.color = glm::vec4(1, 1, 0, 1);
         vert.position = transform(world, glm::vec3(0, 0, 0));
         vertices.push_back(vert);
 
-        vert.color = glm::vec3(1, 0, 0);
+        vert.color = glm::vec4(1, 0, 0, 1);
         vert.position = transform(world, glm::vec3(diff, 0, 0));
         vertices.push_back(vert);
-        vert.color = glm::vec3(1, 0, 0);
+        vert.color = glm::vec4(1, 0, 0, 1);
         vert.position = transform(world, glm::vec3(0, 0, 0));
         vertices.push_back(vert);
 
-        vert.color = glm::vec3(0, 1, 0);
+        vert.color = glm::vec4(0, 1, 0, 1);
         vert.position = transform(world, glm::vec3(0, diff, 0));
         vertices.push_back(vert);
-        vert.color = glm::vec3(0, 1, 0);
+        vert.color = glm::vec4(0, 1, 0, 1);
         vert.position = transform(world, glm::vec3(0, 0, 0));
         vertices.push_back(vert);
 
-        vert.color = glm::vec3(0, 0, 1);
+        vert.color = glm::vec4(0, 0, 1, 1);
         vert.position = transform(world, glm::vec3(0, 0, diff));
         vertices.push_back(vert);
-        vert.color = glm::vec3(0, 0, 1);
+        vert.color = glm::vec4(0, 0, 1, 1);
         vert.position = transform(world, glm::vec3(0, 0, 0));
         vertices.push_back(vert);
 
@@ -371,13 +421,13 @@ void Demo::prepDebug() {
         indices.push_back(i0 + 10);
         indices.push_back(i0 + 11);
 
-        std::shared_ptr<CollisionShape> shape = pair.body->getCollisionShape();
+        /*std::shared_ptr<CollisionShape> shape = pair.body->getCollisionShape();
 
         if (!shape)
             continue;
 
         i0 = vertices.size();
-        vert.color = glm::vec3(1, 0, 0);
+        vert.color = glm::vec4(1, 0, 0, 1);
 
         glm::vec3 min, max;
         shape->getBoundingBox(pair.body.get(), min, max);
@@ -433,7 +483,42 @@ void Demo::prepDebug() {
         indices.push_back(i0 + 6);
 
         indices.push_back(i0 + 3);
-        indices.push_back(i0 + 7);
+        indices.push_back(i0 + 7);*/
+    }
+
+    std::vector<Contact> & contacts = system->getContacts();
+
+    for (auto & contact : contacts) {
+        const float diff = 0.25f;
+        int i0 = vertices.size();
+
+        vert.color = glm::vec4(0, 1, 0, 1);
+        vert.position = contact.position + glm::vec3(-diff, 0, 0);
+        vertices.push_back(vert);
+        vert.color = glm::vec4(0, 1, 0, 1);
+        vert.position = contact.position + glm::vec3(diff, 0, 0);
+        vertices.push_back(vert);
+
+        vert.color = glm::vec4(0, 1, 0, 1);
+        vert.position = contact.position + glm::vec3(0, -diff, 0);
+        vertices.push_back(vert);
+        vert.color = glm::vec4(0, 1, 0, 1);
+        vert.position = contact.position + glm::vec3(0, diff, 0);
+        vertices.push_back(vert);
+
+        vert.color = glm::vec4(0, 1, 0, 1);
+        vert.position = contact.position + glm::vec3(0, 0, -diff);
+        vertices.push_back(vert);
+        vert.color = glm::vec4(0, 1, 0, 1);
+        vert.position = contact.position + glm::vec3(0, 0, diff);
+        vertices.push_back(vert);
+
+        indices.push_back(i0 + 0);
+        indices.push_back(i0 + 1);
+        indices.push_back(i0 + 2);
+        indices.push_back(i0 + 3);
+        indices.push_back(i0 + 4);
+        indices.push_back(i0 + 5);
     }
 
     debug_mesh->setVertices(&vertices[0], vertices.size());

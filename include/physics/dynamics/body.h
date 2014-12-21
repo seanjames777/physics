@@ -20,6 +20,26 @@ class CollisionShape;
 class Body {
 private:
 
+    // Linear quantities are stored as a position vector and a velocity
+    // vector. At the end of the simulation step, position is integrated with
+    // velocity. Angular quantities are stored as an orientation quaternion
+    // and an angular velocity axis*angle vector (axis multiplied by angle).
+    // Note that axis*angle quantities can be added.
+    //
+    // Changes to velocity and angular velocity are done either directly or
+    // through an impulse. This has many useful properties, discussed elsehwere.
+    // Each velocity can be modified directly, or together through the
+    // addImpulse() function. Bodies also support accumulating forces and
+    // torques before a simulation step, which will be applied as impulses
+    // at the beginning of the step.
+    //
+    // Bodies store mass and inverse mass, and an inertia tensor and inverse
+    // inertia tensor. Bodies may also be fixed, in which case they are
+    // treated as if they have infinite mass, and do not move. TODO infinite
+    // inertia tensor too? Bodies may also store a collision shape, which will
+    // be used to detect and correct collisions with other collision shapes
+    // attached to bodies. TODO why not required.
+
     glm::vec3 position;
     glm::quat orientation;
     glm::vec3 linearVelocity;
@@ -55,6 +75,8 @@ public:
 
     void setMass(float mass);
 
+    void setInertiaTensor(glm::mat3 inertiaTensor);
+
     void setFixed(bool fixed);
 
     void addLinearVelocity(glm::vec3 velocity);
@@ -81,9 +103,15 @@ public:
 
     glm::vec3 getAngularVelocity();
 
+    glm::vec3 getVelocityAtPoint(glm::vec3 relPos);
+
     float getMass();
 
     float getInverseMass();
+
+    glm::mat3 getInertiaTensor();
+
+    glm::mat3 getInvInertiaTensor();
 
     bool getFixed();
 

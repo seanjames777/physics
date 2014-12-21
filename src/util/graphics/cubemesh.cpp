@@ -4,7 +4,7 @@
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#include <util/cubemesh.h>
+#include <util/graphics/cubemesh.h>
 
 namespace Physics { namespace Util {
 

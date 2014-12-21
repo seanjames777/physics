@@ -4,7 +4,7 @@
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#include <util/camera.h>
+#include <util/graphics/camera.h>
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace Physics { namespace Util {

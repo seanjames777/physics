@@ -9,7 +9,7 @@
 #ifndef __CUBEMESH_H
 #define __CUBEMESH_H
 
-#include <util/mesh.h>
+#include <util/graphics/mesh.h>
 
 namespace Physics { namespace Util {
 

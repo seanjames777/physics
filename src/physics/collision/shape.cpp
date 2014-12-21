@@ -4,7 +4,7 @@
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#include <physics/collisionshape.h>
+#include <physics/collision/shape.h>
 
 namespace Physics {
 

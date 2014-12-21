@@ -4,7 +4,7 @@
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#include <util/mesh.h>
+#include <util/graphics/mesh.h>
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace Physics { namespace Util {
@@ -40,8 +40,8 @@ Mesh::Mesh()
     offset += sizeof(float) * 2;
 
     glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(MeshVertex), offset);
-    offset += sizeof(float) * 3;
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(MeshVertex), offset);
+    offset += sizeof(float) * 4;
 
     glBindVertexArray(0);
 }

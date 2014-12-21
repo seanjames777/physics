@@ -4,7 +4,7 @@
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#include <util/planemesh.h>
+#include <util/graphics/planemesh.h>
 
 namespace Physics { namespace Util {
 

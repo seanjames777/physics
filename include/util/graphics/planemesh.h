@@ -1,22 +1,22 @@
 /**
- * @file spheremesh.h
+ * @file planemesh.h
  *
- * @brief Sphere mesh
+ * @brief Plane mesh
  *
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#ifndef __SPHEREMESH_H
-#define __SPHEREMESH_H
+#ifndef __PLANEMESH_H
+#define __PLANEMESH_H
 
-#include <util/mesh.h>
+#include <util/graphics/mesh.h>
 
 namespace Physics { namespace Util {
 
 /**
- * @brief Sphere mesh
+ * @brief Plane mesh
  */
-class SphereMesh : public Mesh {
+class PlaneMesh : public Mesh {
 public:
 
     /**
@@ -24,7 +24,7 @@ public:
      *
      * @param[in] shader Shader
      */
-    SphereMesh(int divu, int divv, float r);
+    PlaneMesh(float width, float height);
 
 };
 

@@ -4,7 +4,7 @@
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#include <util/shader.h>
+#include <util/graphics/shader.h>
 #include <fstream>
 #include <iostream>
 #include <mach-o/dyld.h>
@@ -14,6 +14,7 @@
 namespace Physics { namespace Util {
 
 GLint Shader::compile_shader(GLenum stage, std::string filename) {
+    // TODO
     char buff[PATH_MAX + 1];
     uint32_t size = PATH_MAX;
     int stat = _NSGetExecutablePath(buff, &size);

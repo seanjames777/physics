@@ -1,33 +1,30 @@
 /**
- * @file planeshape.h
+ * @file sphereshape.h
  *
- * @brief Plane collision shape
+ * @brief Sphere collision shape
  *
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#ifndef __PLANESHAPE_H
-#define __PLANESHAPE_H
+#ifndef __SPHERESHAPE_H
+#define __SPHERESHAPE_H
 
-#include <physics/collisionshape.h>
+#include <physics/collision/shape.h>
 
 namespace Physics {
 
-class PlaneShape : public CollisionShape {
+class SphereShape : public CollisionShape {
 private:
 
-    glm::vec3 normal;
-    float dist;
+    float r;
 
 public:
 
-    PlaneShape(glm::vec3 normal, float dist);
+    SphereShape(float radius);
 
-    ~PlaneShape();
+    ~SphereShape();
 
-    glm::vec3 getNormal();
-
-    float getDistance();
+    float getRadius();
 
     virtual void checkCollision(CollisionShape *other, Body *b1, Body *b2,
         std::vector<Contact> & contacts) override;

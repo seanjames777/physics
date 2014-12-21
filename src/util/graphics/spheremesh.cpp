@@ -4,7 +4,7 @@
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#include <util/spheremesh.h>
+#include <util/graphics/spheremesh.h>
 #include <vector>
 #include <iostream>
 

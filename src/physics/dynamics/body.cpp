@@ -4,7 +4,7 @@
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#include <physics/body.h>
+#include <physics/dynamics/body.h>
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace Physics {
@@ -44,6 +44,10 @@ glm::vec3 Body::getAngularVelocity() {
     return angularVelocity;
 }
 
+glm::vec3 Body::getVelocityAtPoint(glm::vec3 relPos) {
+    return linearVelocity + glm::cross(angularVelocity, relPos);
+}
+
 float Body::getMass() {
     if (fixed)
         return 1.0f / 0.0f; // Infinity // TODO
@@ -56,6 +60,14 @@ float Body::getInverseMass() {
         return 0.0f;
 
     return invMass;
+}
+
+glm::mat3 Body::getInertiaTensor() {
+    return inertiaTensor;
+}
+
+glm::mat3 Body::getInvInertiaTensor() {
+    return invInertiaTensor;
 }
 
 bool Body::getFixed() {
@@ -85,6 +97,11 @@ void Body::setAngularVelocity(glm::vec3 velocity) {
 void Body::setMass(float mass) {
     this->mass = mass;
     this->invMass = 1.0f / mass;
+}
+
+void Body::setInertiaTensor(glm::mat3 inertiaTensor) {
+    this->inertiaTensor = inertiaTensor;
+    this->invInertiaTensor = glm::inverse(inertiaTensor); // TODO diagonal
 }
 
 void Body::setFixed(bool fixed) {

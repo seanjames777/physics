@@ -4,7 +4,7 @@
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#include <physics/springconstraint.h>
+#include <physics/constraints/springconstraint.h>
 
 namespace Physics {
 

@@ -9,8 +9,8 @@
 #ifndef __RODCONSTRAINT_H
 #define __RODCONSTRAINT_H
 
-#include <physics/constraint.h>
-#include <physics/body.h>
+#include <physics/constraints/constraint.h>
+#include <physics/dynamics/body.h>
 
 namespace Physics {
 

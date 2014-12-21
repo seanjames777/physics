@@ -20,6 +20,7 @@ namespace Physics {
 
 class System;
 class Body;
+class Contact;
 
 namespace Util {
 
@@ -27,6 +28,7 @@ class Mesh;
 class RenderTarget;
 class Shader;
 class Camera;
+class Font;
 
 /**
  * @brief Demo application base class
@@ -47,9 +49,11 @@ private:
     std::shared_ptr<Shader>             phong_shader;          //!< Default object shader
     std::shared_ptr<Shader>             shadow_shader;         //!< Shadow map shader
     std::shared_ptr<Shader>             flat_shader;           //!< Vertex color shader
+    std::shared_ptr<Font>               font;                  //!< Debug display font
     std::shared_ptr<Camera>             camera;                //!< Camera
     std::shared_ptr<System>             system;                //!< Physics system
     double                              time;                  //!< Current time
+    double                              debug_time;            //!< Time debug string last updated
     std::vector<MeshBodyPair>           meshes;                //!< List of meshes to draw
     glm::vec3                           lightDir;              //!< Global light direction
     float                               shadowBounds;          //!< Shadow view rectangle width/height
@@ -58,6 +62,10 @@ private:
     glm::mat4                           lightViewProjection;   //!< Shadow view * projectionm matrix
     std::shared_ptr<RenderTarget>       shadowTarget;          //!< Shadow render target
     std::shared_ptr<Mesh>               debug_mesh;            //!< Debug visualization mesh
+    char                                debug_buff[1024];      //!< Debug string TODO big
+    double                              frameTime;             //!< Accumulated frame time
+    double                              physicsTime;           //!< Accumulated physics time
+    int                                 nFrames;               //!< Accumulated frame count
 
     /**
      * @brief Handle window resize events

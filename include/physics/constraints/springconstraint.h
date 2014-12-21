@@ -9,8 +9,8 @@
 #ifndef __SPRINGCONSTRAINT_H
 #define __SPRINGCONSTRAINT_H
 
-#include <physics/constraint.h>
-#include <physics/body.h>
+#include <physics/constraints/constraint.h>
+#include <physics/dynamics/body.h>
 
 namespace Physics {
 
