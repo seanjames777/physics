@@ -6,6 +6,8 @@
 
 #include <physics/dynamics/body.h>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <iostream> // TODO
 
 namespace Physics {
 
@@ -63,10 +65,16 @@ float Body::getInverseMass() {
 }
 
 glm::mat3 Body::getInertiaTensor() {
+    if (fixed)
+        return glm::mat3(1.0f / 0.0f);
+
     return inertiaTensor;
 }
 
 glm::mat3 Body::getInvInertiaTensor() {
+    if (fixed)
+        return glm::mat3(0.0f);
+
     return invInertiaTensor;
 }
 

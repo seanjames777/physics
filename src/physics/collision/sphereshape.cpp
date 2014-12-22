@@ -30,10 +30,10 @@ void SphereShape::checkCollision(CollisionShape *other, Body *b1, Body *b2,
 
     // TODO: dynamic_cast forces rtti
     if (SphereShape *other_sphere = dynamic_cast<SphereShape *>(other)) {
-        glm::vec3 diff = b1->getPosition() - b2->getPosition();
-        glm::vec3 norm = glm::normalize(diff);
+        glm::vec3 diff = b2->getPosition() - b1->getPosition();
         // TODO: dot might be faster. also elsewhere. squared dist?
         float dist = glm::length(diff);
+        glm::vec3 norm = diff / dist; // TODO dist might be zero
 
         if (dist < r + other_sphere->r) {
             contact.b1 = b1;
@@ -55,9 +55,8 @@ void SphereShape::checkCollision(CollisionShape *other, Body *b1, Body *b2,
         if (dist < r) {
             contact.b1 = b1;
             contact.b2 = b2;
-            contact.normal = other_plane->getNormal();
+            contact.normal = -other_plane->getNormal();
             contact.depth = r - dist;
-            contact.position = b1->getPosition() - contact.normal * dist;
 
             contacts.push_back(contact);
         }

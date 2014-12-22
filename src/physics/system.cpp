@@ -71,46 +71,52 @@ void System::resolveContact(Contact & contact) {
     // approach a stable set of impulses. We need to separate objects and
     // apply friction but also keep stacks stable.
 
-    float elasticity = 0.4f; // "Bounciness" or coefficient of restitution
+    float elasticity = 0.1f; // "Bounciness" or coefficient of restitution
     float bias = 0.3f;       // Additional impulse along normal for separation
 
     // Position of contact relative to centers of mass
-    glm::vec3 r1 = contact.position - contact.b1->getPosition();
-    glm::vec3 r2 = contact.position - contact.b2->getPosition();
+    glm::vec3 p = contact.position;
+    glm::vec3 r1 = p - contact.b1->getPosition();
+    glm::vec3 r2 = p - contact.b2->getPosition();
 
     // Inverse mass
-    float m1 = contact.b1->getInverseMass();
-    float m2 = contact.b2->getInverseMass();
+    float im1 = contact.b1->getInverseMass();
+    float im2 = contact.b2->getInverseMass();
+    glm::mat3 iI1 = contact.b1->getInvInertiaTensor();
+    glm::mat3 iI2 = contact.b2->getInvInertiaTensor();
 
     // Relative velocities at relative positions
     glm::vec3 v1 = contact.b1->getVelocityAtPoint(r1);
     glm::vec3 v2 = contact.b2->getVelocityAtPoint(r2);
 
     // Relative velocity along normal
-    glm::vec3 rvel = v1 - v2;
-    float vn = glm::dot(rvel, contact.normal);
+    // Normal points from 1 -> 2
+    glm::vec3 rvel = v2 - v1;
+    glm::vec3 n = contact.normal;
+    float vn = glm::dot(rvel, n);
 
-    glm::vec3 t1 = glm::cross(contact.normal, rvel);
-    glm::vec3 t2 = glm::cross(contact.normal, t1);
+    //glm::vec3 t1 = glm::cross(n, rvel);
+    //glm::vec3 t2 = glm::cross(n, t1);
 
     if (contact.depth < 0.0f) contact.depth = 0.0f; // TODO
 
     // Normal constraint
     {
         float J = -(1.0f + elasticity) * vn + bias / step * contact.depth;
-        float div = m1 + m2;
-        /*div += glm::dot(
-            (contact.b1->getInvInertiaTensor() * glm::cross(glm::cross(r1, contact.normal), r1) +
-             contact.b2->getInvInertiaTensor() * glm::cross(glm::cross(r2, contact.normal), r2)),
-            contact.normal);*/
+        float div = im1 + im2;
+
+        div += glm::dot(
+            (iI1 * glm::cross(glm::cross(r1, n), r1) +
+             iI2 * glm::cross(glm::cross(r2, n), r2)),
+            n);
         J /= div;
 
         // TODO: clamp acculuated value. TODO discuss.
         if (J < 0.0f)
             J = 0.0f;
 
-        contact.b1->addImpulse( J * contact.normal, r1);
-        contact.b2->addImpulse(-J * contact.normal, r2);
+        contact.b1->addImpulse(-J * n, r1);
+        contact.b2->addImpulse( J * n, r2);
     }
 
     /*float vt1 = glm::dot(rvel, t1);

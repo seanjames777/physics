@@ -47,6 +47,7 @@ protected:
 
         int N = 14;
         float R = 1.0f;
+        float M = 1.0f;
 
         float dy = sqrtf((R * 2.0f) * (R * 2.0f) - R * R);
 
@@ -58,6 +59,10 @@ protected:
                 system->addBody(sphereBody);
                 sphereBody->setPosition(p);
                 sphereBody->setCollisionShape(std::make_shared<SphereShape>(R));
+                sphereBody->setMass(M);
+
+                float I = 2.0f * M * R * R / 5.0f;
+                //sphereBody->setInertiaTensor(glm::mat3(I, 0, 0, 0, I, 0, 0, 0, I));
 
                 if (j == 0 && (i == 0 || i == N - j - 1))
                     sphereBody->setFixed(true);
@@ -71,11 +76,13 @@ protected:
         cam->setPitch(10);
         //cam->setTarget(glm::vec3(0, N * R, 0));
 
-        auto sphereBody = std::make_shared<Body>();
+        /*auto sphereBody = std::make_shared<Body>();
         getSystem()->addBody(sphereBody);
         sphereBody->setPosition(glm::vec3(0, 1, 5));
         sphereBody->setCollisionShape(std::make_shared<SphereShape>(1.0f));
         sphereBody->setMass(1.0f);
+        float I = 2.0f / 5.0f;
+        sphereBody->setInertiaTensor(glm::mat3(I, 0, 0, 0, I, 0, 0, 0, I));
         sphereBody->setInertiaTensor(glm::mat3(
             .4f, 0, 0,
             0, .4f, 0,
@@ -83,7 +90,7 @@ protected:
 
         addMesh(std::make_shared<SphereMesh>(30, 15, 1.0f), sphereBody);
 
-        sphereBody->addImpulse(glm::vec3(-20, 0, 0), glm::vec3(0, -0.2f, 0));
+        sphereBody->addImpulse(glm::vec3(-20, 0, 0), glm::vec3(0, -0.2f, 0));*/
     }
 
     virtual void demo_mouseDown(int button) {
