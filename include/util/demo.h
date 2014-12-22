@@ -67,6 +67,10 @@ private:
     char                                debug_buff[1024];      //!< Debug string TODO big
     double                              frameTime;             //!< Accumulated frame time
     double                              physicsTime;           //!< Accumulated physics time
+    int                                 contacts;              //!< Accumulated physics contacts
+    double                              avgFrameTime;          //!< Average frame time
+    double                              avgPhysicsTime;        //!< Average physics time
+    int                                 avgContacts;           //!< Average number of physics contacts
     int                                 nFrames;               //!< Accumulated frame count
     double                              mouseX;                //!< Mouse X coordinate
     double                              mouseY;                //!< Mouse Y coordinate
@@ -140,6 +144,11 @@ private:
      * @brief Update camera position based on WSAD keys
      */
     void updateCamera(double dt);
+
+    /**
+     * @brief Update debug string
+     */
+    void updateDebugBuff();
 
 protected:
 

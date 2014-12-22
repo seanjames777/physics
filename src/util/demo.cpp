@@ -147,6 +147,10 @@ Demo::Demo(std::string title, int width, int height, int shadowSize, bool vsync)
       shadowTarget(nullptr),
       frameTime(0.0),
       physicsTime(0.0),
+      contacts(0),
+      avgFrameTime(0.0),
+      avgPhysicsTime(0.0),
+      avgContacts(0),
       nFrames(0),
       mouseX(0),
       mouseY(0),
@@ -232,6 +236,47 @@ Demo::Demo(std::string title, int width, int height, int shadowSize, bool vsync)
     font = std::make_shared<Font>("content/fonts/consolas_bold.ttf", 0, 12);
 
     memset(keys, 0, sizeof(keys));
+}
+
+void Demo::updateDebugBuff() {
+    // TODO changes quickly potentially
+    std::vector<Contact> & contacts_vec = system->getContacts();
+    std::vector<std::shared_ptr<Body>> & bodies = system->getBodies();
+
+    contacts += contacts_vec.size();
+
+    if (time - debug_time > 1.0) {
+        debug_time = time;
+
+        if (nFrames > 0) {
+            frameTime /= nFrames;
+            physicsTime /= nFrames;
+            contacts /= nFrames;
+        }
+        else {
+            frameTime = 0.0;
+            physicsTime = 0.0;
+            contacts = 0;
+        }
+
+        avgFrameTime = frameTime * 1000.0;
+        avgPhysicsTime = physicsTime * 1000.0;
+        avgContacts = contacts;
+
+        frameTime = 0;
+        physicsTime = 0;
+        nFrames = 0;
+    }
+
+    sprintf(debug_buff,
+        "    Contacts: %ld\n"
+        "      Bodies: %ld\n"
+        "  Frame Time: %.02f ms\n"
+        "Physics Time: %.02f ms\n"
+        "   Time Warp: %.02f\n"
+        "%s"
+        , avgContacts, bodies.size(), avgFrameTime, avgPhysicsTime,
+        timeWarp, pausePhysics ? "Simulation paused\n" : "");
 }
 
 void Demo::draw() {
@@ -342,38 +387,7 @@ void Demo::draw() {
     glEnable(GL_DEPTH_TEST);
     flat_shader->unbind();
 
-    if (time - debug_time > 1.0) {
-        debug_time = time;
-
-        std::vector<Contact> & contacts = system->getContacts();
-        std::vector<std::shared_ptr<Body>> & bodies = system->getBodies();
-
-        if (nFrames > 0) {
-            frameTime /= nFrames;
-            physicsTime /= nFrames;
-        }
-        else {
-            frameTime = 0.0;
-            physicsTime = 0.0;
-        }
-
-        frameTime *= 1000.0;
-        physicsTime *= 1000.0;
-
-        sprintf(debug_buff,
-            "    Contacts: %ld\n"
-            "      Bodies: %ld\n"
-            "  Frame Time: %.02f ms\n"
-            "Physics Time: %.02f ms\n"
-            "   Time Warp: %.02f\n"
-            "%s"
-            , contacts.size(), bodies.size(), frameTime, physicsTime, timeWarp,
-            pausePhysics ? "Simulation paused\n" : "");
-
-        frameTime = 0;
-        physicsTime = 0;
-        nFrames = 0;
-    }
+    updateDebugBuff();
 
     font->drawString(debug_buff, 10, 10);
     font->flush(width, height);
