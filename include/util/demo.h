@@ -16,6 +16,16 @@
 
 class GLFWwindow;
 
+namespace Graphics {
+
+class Mesh;
+class RenderTarget;
+class Shader;
+class FPSCamera;
+class Font;
+
+}
+
 namespace Physics {
 
 class System;
@@ -24,11 +34,7 @@ class Contact;
 
 namespace Util {
 
-class Mesh;
-class RenderTarget;
-class Shader;
-class FPSCamera;
-class Font;
+using namespace Graphics; // TODO
 
 #define MAX_KEY (11*32)
 

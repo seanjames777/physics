@@ -10,9 +10,9 @@
 #define __FPSCAMERA_H
 
 #include <glm/glm.hpp>
-#include <util/graphics/camera.h>
+#include <graphics/camera.h>
 
-namespace Physics { namespace Util {
+namespace Graphics {
 
 /**
  * @brief First person shooter style yaw/pitch camera
@@ -76,6 +76,6 @@ public:
 
 };
 
-}}
+}
 
 #endif

@@ -7,10 +7,10 @@
  */
 
 #include <util/demo.h>
-#include <util/graphics/planemesh.h>
-#include <util/graphics/spheremesh.h>
-#include <util/graphics/cubemesh.h>
-#include <util/graphics/fpscamera.h>
+#include <graphics/planemesh.h>
+#include <graphics/spheremesh.h>
+#include <graphics/cubemesh.h>
+#include <graphics/fpscamera.h>
 #include <physics/constraints/springconstraint.h>
 #include <physics/constraints/rodconstraint.h>
 #include <physics/collision/sphereshape.h>

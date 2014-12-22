@@ -11,9 +11,9 @@
 
 #include <GL/glew.h>
 #include <glm/glm.hpp>
-#include <util/graphics/shader.h>
+#include <graphics/shader.h>
 
-namespace Physics { namespace Util {
+namespace Graphics {
 
 /**
  * @brief Mesh vertex type
@@ -53,6 +53,6 @@ public:
 
 };
 
-}}
+}
 
 #endif

@@ -4,10 +4,10 @@
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#include <util/graphics/mesh.h>
+#include <graphics/mesh.h>
 #include <glm/gtc/matrix_transform.hpp>
 
-namespace Physics { namespace Util {
+namespace Graphics {
 
 Mesh::Mesh()
     : vb(0),
@@ -77,4 +77,4 @@ void Mesh::draw() {
     glBindVertexArray(0); // TODO
 }
 
-}}
+}

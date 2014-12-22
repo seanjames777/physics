@@ -9,9 +9,9 @@
 #ifndef __SPHEREMESH_H
 #define __SPHEREMESH_H
 
-#include <util/graphics/mesh.h>
+#include <graphics/mesh.h>
 
-namespace Physics { namespace Util {
+namespace Graphics {
 
 /**
  * @brief Sphere mesh
@@ -28,6 +28,6 @@ public:
 
 };
 
-}}
+}
 
 #endif

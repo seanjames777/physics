@@ -4,9 +4,9 @@
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#include <util/graphics/cubemesh.h>
+#include <graphics/cubemesh.h>
 
-namespace Physics { namespace Util {
+namespace Graphics {
 
 CubeMesh::CubeMesh(float width, float height,
     float depth)
@@ -192,4 +192,4 @@ CubeMesh::CubeMesh(float width, float height,
     setIndices(indices, 36);
 }
 
-}}
+}

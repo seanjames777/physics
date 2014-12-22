@@ -19,15 +19,16 @@ add_library(physics
 
 add_library(util
     src/util/demo.cpp
-    src/util/graphics/camera.cpp
-    src/util/graphics/cubemesh.cpp
-    src/util/graphics/font.cpp
-    src/util/graphics/fpscamera.cpp
-    src/util/graphics/mesh.cpp
-    src/util/graphics/planemesh.cpp
-    src/util/graphics/rendertarget.cpp
-    src/util/graphics/shader.cpp
-    src/util/graphics/spheremesh.cpp
+    src/graphics/camera.cpp
+    src/graphics/cubemesh.cpp
+    src/graphics/font.cpp
+    src/graphics/fpscamera.cpp
+    src/graphics/mesh.cpp
+    src/graphics/path.cpp
+    src/graphics/planemesh.cpp
+    src/graphics/rendertarget.cpp
+    src/graphics/shader.cpp
+    src/graphics/spheremesh.cpp
 )
 
 target_link_libraries(util

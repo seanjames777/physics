@@ -4,29 +4,16 @@
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#include <util/graphics/shader.h>
+#include <graphics/shader.h>
+#include <graphics/path.h>
 #include <fstream>
 #include <iostream>
-#include <mach-o/dyld.h>
 #include <cassert>
-#include <sstream>
 
-namespace Physics { namespace Util {
+namespace Graphics {
 
 GLint Shader::compile_shader(GLenum stage, std::string filename) {
-    // TODO
-    char buff[PATH_MAX + 1];
-    uint32_t size = PATH_MAX;
-    int stat = _NSGetExecutablePath(buff, &size);
-    assert(!stat && "_NSGetExecutablePath failed");
-    buff[size] = 0;
-    std::string exe_path(buff);
-
-    std::string exe_dir = exe_path.substr(0, exe_path.rfind("/"));
-
-    std::stringstream path_str;
-    path_str << exe_dir << "/" << filename;
-    std::string path = path_str.str();
+    std::string path = PathUtil::prependExecutableDirectory(filename);
 
     std::ifstream in_src(path, std::ifstream::binary);
 
@@ -199,4 +186,4 @@ void Shader::unbind() {
     glUseProgram(0);
 }
 
-}}
+}

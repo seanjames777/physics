@@ -9,9 +9,9 @@
 #ifndef __CUBEMESH_H
 #define __CUBEMESH_H
 
-#include <util/graphics/mesh.h>
+#include <graphics/mesh.h>
 
-namespace Physics { namespace Util {
+namespace Graphics {
 
 /**
  * @brief Cube mesh
@@ -28,6 +28,6 @@ public:
 
 };
 
-}}
+}
 
 #endif

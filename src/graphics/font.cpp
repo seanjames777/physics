@@ -23,15 +23,13 @@
  *      distribution.
  */
 
-#include <util/graphics/font.h>
-#include <util/graphics/mesh.h>
-#include <util/graphics/shader.h>
+#include <graphics/font.h>
+#include <graphics/mesh.h>
+#include <graphics/shader.h>
+#include <graphics/path.h>
 #include <glm/gtc/type_ptr.hpp>
-#include <mach-o/dyld.h>
-#include <sstream>
 
-namespace Physics {
-namespace Util {
+namespace Graphics {
 
 bool Font::ftInitted = false;
 FT_Library Font::library;
@@ -134,19 +132,7 @@ Font::Font(std::string filename, int faceIdx, int ptSize, int lineHeight,
         ftInitted = true;
     }
 
-    // TODO
-    char path_buff[PATH_MAX + 1];
-    uint32_t size = PATH_MAX;
-    int stat = _NSGetExecutablePath(path_buff, &size);
-    assert(!stat && "_NSGetExecutablePath failed");
-    path_buff[size] = 0;
-    std::string exe_path(path_buff);
-
-    std::string exe_dir = exe_path.substr(0, exe_path.rfind("/"));
-
-    std::stringstream path_str;
-    path_str << exe_dir << "/" << filename;
-    std::string path = path_str.str();
+    std::string path = PathUtil::prependExecutableDirectory(filename);
 
     FT_Face face;
     status = FT_New_Face(library, path.c_str(), faceIdx, &face);
@@ -357,4 +343,4 @@ void Font::setColor(glm::vec4 color) {
     this->color = color;
 }
 
-}}
+}

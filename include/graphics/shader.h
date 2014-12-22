@@ -12,7 +12,7 @@
 #include <string>
 #include <GL/glew.h>
 
-namespace Physics { namespace Util {
+namespace Graphics {
 
 /**
  * @brief Shader wrapper class
@@ -105,6 +105,6 @@ public:
 
 };
 
-}}
+}
 
 #endif

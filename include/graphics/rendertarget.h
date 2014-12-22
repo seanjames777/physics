@@ -14,7 +14,7 @@
 
 #define MAX_COLOR_BUFF 4
 
-namespace Physics { namespace Util {
+namespace Graphics {
 
 /**
  * @brief Target for offscreen rendering
@@ -141,6 +141,6 @@ public:
 
 };
 
-}}
+}
 
 #endif

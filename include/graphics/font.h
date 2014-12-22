@@ -39,8 +39,7 @@
 #define NCHAR (MAX_CHAR - MIN_CHAR + 1)   //!< Number of characters
 #define CHAR_DIM 10                       //!< Chars per row/column in atlas
 
-namespace Physics { // TODO match directory structure. Also maybe don't require "Physics"
-namespace Util {
+namespace Graphics {
 
 class Mesh;
 class MeshVertex;
@@ -211,6 +210,6 @@ public:
 
 };
 
-}}
+}
 
 #endif

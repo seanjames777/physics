@@ -9,9 +9,9 @@
 #ifndef __PLANEMESH_H
 #define __PLANEMESH_H
 
-#include <util/graphics/mesh.h>
+#include <graphics/mesh.h>
 
-namespace Physics { namespace Util {
+namespace Graphics {
 
 /**
  * @brief Plane mesh
@@ -28,6 +28,6 @@ public:
 
 };
 
-}}
+}
 
 #endif

@@ -4,9 +4,9 @@
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#include <util/graphics/planemesh.h>
+#include <graphics/planemesh.h>
 
-namespace Physics { namespace Util {
+namespace Graphics {
 
 PlaneMesh::PlaneMesh(float width, float height) {
     MeshVertex vertices[4];
@@ -38,4 +38,4 @@ PlaneMesh::PlaneMesh(float width, float height) {
     setIndices(indices, 6);
 }
 
-}}
+}

@@ -4,10 +4,10 @@
  * @author Sean James
  */
 
-#include <util/graphics/fpscamera.h>
+#include <graphics/fpscamera.h>
 #include <glm/gtc/matrix_transform.hpp>
 
-namespace Physics { namespace Util {
+namespace Graphics {
 
 void FPSCamera::update() {
     glm::mat4 rotate =
@@ -56,4 +56,4 @@ void FPSCamera::setPitch(float pitch) {
     update();
 }
 
-}}
+}

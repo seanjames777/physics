@@ -4,11 +4,11 @@
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#include <util/graphics/rendertarget.h>
+#include <graphics/rendertarget.h>
 #include <cassert>
 #include <iostream> // TODO
 
-namespace Physics { namespace Util {
+namespace Graphics {
 
 RenderTarget::RenderTarget(int width, int height, int samples)
     : width(width),
@@ -208,4 +208,4 @@ void RenderTarget::blit(int x0, int y0, int w, int h, int colorIdx) {
     glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 }
 
-}}
+}

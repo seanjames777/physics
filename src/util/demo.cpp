@@ -11,17 +11,17 @@
 #include <iostream>
 #include <cassert>
 #include <sys/time.h>
-#include <util/graphics/mesh.h>
-#include <util/graphics/fpscamera.h>
-#include <util/graphics/shader.h>
-#include <util/graphics/rendertarget.h>
+#include <graphics/mesh.h>
+#include <graphics/fpscamera.h>
+#include <graphics/shader.h>
+#include <graphics/rendertarget.h>
 #include <physics/system.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <physics/collision/shape.h>
 #include <physics/dynamics/body.h>
-#include <util/graphics/font.h>
+#include <graphics/font.h>
 
 using namespace std::placeholders;
 

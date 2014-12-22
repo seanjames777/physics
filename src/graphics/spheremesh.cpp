@@ -4,11 +4,11 @@
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#include <util/graphics/spheremesh.h>
+#include <graphics/spheremesh.h>
 #include <vector>
 #include <iostream>
 
-namespace Physics { namespace Util {
+namespace Graphics {
 
 glm::vec3 spherePos(float u, float v, float r) {
     float theta = u * 2.0f * M_PI;
@@ -88,4 +88,4 @@ SphereMesh::SphereMesh(int nu, int nv, float r)
     setIndices(&indices[0], indices.size());
 }
 
-}}
+}

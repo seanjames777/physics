@@ -11,7 +11,7 @@
 
 #include <glm/glm.hpp>
 
-namespace Physics { namespace Util {
+namespace Graphics {
 
 /**
  * @brief Camera base class
@@ -115,6 +115,6 @@ public:
 
 };
 
-}}
+}
 
 #endif
