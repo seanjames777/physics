@@ -156,7 +156,7 @@ Demo::Demo(std::string title, int width, int height, int shadowSize, bool vsync)
 {
     glfwInit();
 
-    glfwWindowHint(GLFW_SAMPLES, 0);
+    glfwWindowHint(GLFW_SAMPLES, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, true);
@@ -378,7 +378,7 @@ void Demo::draw() {
     font->drawString(debug_buff, 10, 10);
     font->flush(width, height);
 
-    shadowTarget->blit(0, 0, 300, 300, 0);
+    //shadowTarget->blit(0, 0, 300, 300, 0);
 }
 
 void Demo::updateCamera(double dt) {
