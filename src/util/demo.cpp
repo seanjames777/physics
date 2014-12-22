@@ -4,24 +4,25 @@
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#include <util/demo.h>
+#include <cassert>
+#include <functional>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include <functional>
-#include <iostream>
-#include <cassert>
-#include <sys/time.h>
-#include <graphics/mesh.h>
-#include <graphics/fpscamera.h>
-#include <graphics/shader.h>
-#include <graphics/rendertarget.h>
-#include <physics/system.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <graphics/font.h>
+#include <graphics/fpscamera.h>
+#include <graphics/mesh.h>
+#include <graphics/rendertarget.h>
+#include <graphics/shader.h>
+#include <graphics/texture.h>
+#include <iostream>
 #include <physics/collision/shape.h>
 #include <physics/dynamics/body.h>
-#include <graphics/font.h>
+#include <physics/system.h>
+#include <sys/time.h>
+#include <util/demo.h>
 
 using namespace std::placeholders;
 
@@ -136,6 +137,7 @@ Demo::Demo(std::string title, int width, int height, int shadowSize, bool vsync)
       phong_shader(nullptr),
       shadow_shader(nullptr),
       font(nullptr),
+      texture(nullptr),
       camera(nullptr),
       system(nullptr),
       time(0.0),
@@ -235,6 +237,30 @@ Demo::Demo(std::string title, int width, int height, int shadowSize, bool vsync)
 
     font = std::make_shared<Font>("content/fonts/consolas_bold.ttf", 0, 12);
 
+    const int TEX_SIZE = 1024;
+    const int TEX_CELL = 128;
+    texture = std::make_shared<Texture>(TEX_SIZE, TEX_SIZE, GL_RGB, GL_UNSIGNED_BYTE, 6);
+
+    unsigned char *pixels = new unsigned char[TEX_SIZE * TEX_SIZE * 3];
+
+    for (int y = 0; y < TEX_SIZE; y++) {
+        for (int x = 0; x < TEX_SIZE; x++) {
+            int i0 = (y * TEX_SIZE + x) * 3;
+
+            int cellX = (x / TEX_CELL) % 2;
+            int cellY = (y / TEX_CELL) % 2;
+            int color = cellX ^ cellY;
+
+            pixels[i0 + 0] = color ? 121 : 121 * 3 / 5;
+            pixels[i0 + 1] = color ? 181 : 181 * 3 / 5;
+            pixels[i0 + 2] = color ? 255 : 255 * 3 / 5;
+        }
+    }
+
+    texture->setData(pixels, GL_RGB);
+
+    delete [] pixels;
+
     memset(keys, 0, sizeof(keys));
 }
 
@@ -331,6 +357,8 @@ void Demo::draw() {
         phong_shader->getProgram(), "lightWorldViewProjection");
     GLint depthTextureLocation = glGetUniformLocation(
         phong_shader->getProgram(), "depthTexture");
+    GLint diffuseTextureLocation = glGetUniformLocation(
+        phong_shader->getProgram(), "diffuseTexture");
     GLint lightDirectionLocation = glGetUniformLocation(
         phong_shader->getProgram(), "lightDirection");
     GLint depthTextureSizeLocation = glGetUniformLocation(
@@ -344,7 +372,8 @@ void Demo::draw() {
 
     phong_shader->bind();
 
-    shadowTarget->bindColorTexture(0, 0);
+    texture->bind(0);
+    shadowTarget->bindColorTexture(1, 0);
 
     for (auto & pair : meshes) {
         // TODO redundant
@@ -360,7 +389,8 @@ void Demo::draw() {
             glm::value_ptr(lightWorldViewProjection));
         glUniformMatrix4fv(worldInverseTransposeLocation, 1, false,
             glm::value_ptr(worldInverseTranspose));
-        glUniform1i(depthTextureLocation, 0);
+        glUniform1i(depthTextureLocation, 1);
+        glUniform1i(diffuseTextureLocation, 0);
         glUniform1i(depthTextureSizeLocation, shadowSize);
         glUniform3fv(lightDirectionLocation, 1,
             glm::value_ptr(lightDir));
@@ -368,7 +398,8 @@ void Demo::draw() {
         pair.mesh->draw();
     }
 
-    shadowTarget->unbindColorTexture(0);
+    texture->unbind(0);
+    shadowTarget->unbindColorTexture(1);
 
     phong_shader->unbind();
 

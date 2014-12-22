@@ -29,6 +29,7 @@ add_library(util
     src/graphics/rendertarget.cpp
     src/graphics/shader.cpp
     src/graphics/spheremesh.cpp
+    src/graphics/texture.cpp
 )
 
 target_link_libraries(util

@@ -1,6 +1,7 @@
 #version 410 core
 
 uniform sampler2D depthTexture;
+uniform sampler2D diffuseTexture;
 uniform vec3 lightDirection;
 uniform int depthTextureSize;
 
@@ -43,5 +44,7 @@ void main() {
     lambert = lambert * .8 + .2;
     lambert *= shadow;
 
-    out_color = vec4(lambert, lambert, lambert, 1);
+    vec4 diffuse = texture(diffuseTexture, var_uv);
+
+    out_color = vec4(diffuse.rgb * lambert, 1);
 }

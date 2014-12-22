@@ -23,6 +23,7 @@ class RenderTarget;
 class Shader;
 class FPSCamera;
 class Font;
+class Texture;
 
 }
 
@@ -58,6 +59,7 @@ private:
     std::shared_ptr<Shader>             shadow_shader;         //!< Shadow map shader
     std::shared_ptr<Shader>             flat_shader;           //!< Vertex color shader
     std::shared_ptr<Font>               font;                  //!< Debug display font
+    std::shared_ptr<Texture>            texture;
     std::shared_ptr<FPSCamera>          camera;                //!< Camera
     std::shared_ptr<System>             system;                //!< Physics system
     double                              time;                  //!< Current time
