@@ -43,7 +43,7 @@ protected:
         addMesh(std::make_shared<PlaneMesh>(40, 40), quadBody);
         system->addBody(quadBody);
 
-        int N = 15;
+        int N = 11;
         float R = 1.0f;
         float M = 1.0f;
 

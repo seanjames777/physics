@@ -226,7 +226,7 @@ void System::integrate(double t, double dt) {
             }
         }
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 5; i++) {
             for (auto & contact : contacts)
                 resolveContact(contact);
 
