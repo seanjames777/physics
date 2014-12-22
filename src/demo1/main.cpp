@@ -62,7 +62,7 @@ protected:
                 sphereBody->setMass(M);
 
                 float I = 2.0f * M * R * R / 5.0f;
-                //sphereBody->setInertiaTensor(glm::mat3(I, 0, 0, 0, I, 0, 0, 0, I));
+                sphereBody->setInertiaTensor(glm::mat3(I, 0, 0, 0, I, 0, 0, 0, I));
 
                 if (j == 0 && (i == 0 || i == N - j - 1))
                     sphereBody->setFixed(true);
