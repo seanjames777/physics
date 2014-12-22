@@ -44,4 +44,14 @@ void main() {
     lambert *= shadow;
 
     out_color = vec4(lambert, lambert, lambert, 1);
+
+    vec2 uv = var_uv;
+
+    out_color = vec4(
+        uv.x > 0.5 ? 1.0 : 0.2,
+        uv.y > 0.5 ? 1.0 : 0.2,
+        0.0,
+        1.0);
+
+    out_color *= lambert;
 }

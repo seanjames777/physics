@@ -180,8 +180,8 @@ public:
     /**
      * @brief Constructor
      */
-    Demo(std::string title = "Physics Demo", int width = 1024,
-        int height = 768, int shadowSize = 1024, bool vsync = true);
+    Demo(std::string title = "Physics Demo", int width = 1280,
+        int height = 720, int shadowSize = 1024, bool vsync = true);
 
     /**
      * @brief Run demo to completion

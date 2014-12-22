@@ -40,7 +40,7 @@ void SphereShape::checkCollision(CollisionShape *other, Body *b1, Body *b2,
             contact.b2 = b2;
             contact.normal = norm;
             contact.depth = r + other_sphere->r - dist;
-            contact.position = b2->getPosition() + norm * other_sphere->r;
+            contact.position = b1->getPosition() + norm * r;
 
             contacts.push_back(contact);
         }

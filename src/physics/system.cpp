@@ -85,78 +85,95 @@ void System::resolveContact(Contact & contact) {
     glm::mat3 iI1 = contact.b1->getInvInertiaTensor();
     glm::mat3 iI2 = contact.b2->getInvInertiaTensor();
 
-    // Relative velocities at relative positions
-    glm::vec3 v1 = contact.b1->getVelocityAtPoint(r1);
-    glm::vec3 v2 = contact.b2->getVelocityAtPoint(r2);
-
     // Relative velocity along normal
     // Normal points from 1 -> 2
-    glm::vec3 rvel = v2 - v1;
+    glm::vec3 rvel = contact.b2->getVelocityAtPoint(r2) - contact.b1->getVelocityAtPoint(r1);
     glm::vec3 n = contact.normal;
     float vn = glm::dot(rvel, n);
 
-    //glm::vec3 t1 = glm::cross(n, rvel);
-    //glm::vec3 t2 = glm::cross(n, t1);
-
     if (contact.depth < 0.0f) contact.depth = 0.0f; // TODO
+
+    float Jn = 0.0f;
 
     // Normal constraint
     {
-        float J = -(1.0f + elasticity) * vn + bias / step * contact.depth;
+        Jn = -(1.0f + elasticity) * vn + bias / step * contact.depth;
         float div = im1 + im2;
-
         div += glm::dot(
             (iI1 * glm::cross(glm::cross(r1, n), r1) +
              iI2 * glm::cross(glm::cross(r2, n), r2)),
             n);
-        J /= div;
+        Jn /= div;
 
         // TODO: clamp acculuated value. TODO discuss.
-        if (J < 0.0f)
-            J = 0.0f;
+        if (Jn < 0.0f)
+            Jn = 0.0f;
 
-        contact.b1->addImpulse(-J * n, r1);
-        contact.b2->addImpulse( J * n, r2);
+        contact.b1->addImpulse(-Jn * n, r1);
+        contact.b2->addImpulse( Jn * n, r2);
     }
 
-    /*float vt1 = glm::dot(rvel, t1);
+    float rv_len = glm::length(rvel);
+
+    if (vn == 0.0f)
+        return;
+
+    glm::vec3 t = rvel - n * vn;
+
+    float l = glm::length(t);
+
+    if (l == 0.0f)
+        return;
+
+    t /= l;
+
+    const float fric_clamp = 0.9f * Jn;
+
+    glm::vec3 t1 = t;
+    //glm::vec3 t2 = glm::vec3(0, 0, 1);
+
+    //rvel = contact.b2->getVelocityAtPoint(r2) - contact.b1->getVelocityAtPoint(r1);
+    float vt1 = glm::dot(rvel, t1);
 
     // Tangent/friction constraint 1
     {
         float J = -vt1;
-        float div = m1 + m2;
+        float div = im1 + im2;
         div += glm::dot(
-            (contact.b1->getInvInertiaTensor() * glm::cross(glm::cross(r1, t1), r1) +
-             contact.b2->getInvInertiaTensor() * glm::cross(glm::cross(r2, t1), r2)),
+            (iI1 * glm::cross(glm::cross(r1, t1), r1) +
+             iI2 * glm::cross(glm::cross(r2, t1), r2)),
             t1);
         J /= div;
 
-        // TODO: clamp acculuated value
-        //if (J < 0.0f)
-        //    J = 0.0f;
+        if (J < -fric_clamp)
+            J = -fric_clamp;
+        else if (J > fric_clamp)
+            J = fric_clamp;
 
-        contact.b1->addImpulse( J * t1, r1);
-        contact.b2->addImpulse(-J * t1, r2);
+        contact.b1->addImpulse(-J * t1, r1);
+        contact.b2->addImpulse( J * t1, r2);
     }
 
-    float vt2 = glm::dot(rvel, t2);
+    //rvel = contact.b2->getVelocityAtPoint(r2) - contact.b1->getVelocityAtPoint(r1);
+    /*float vt2 = glm::dot(rvel, t2);
 
-    // Tangent/friction constraint 2
+    // Tangent/friction constraint 1
     {
         float J = -vt2;
-        float div = m1 + m2;
+        float div = im1 + im2;
         div += glm::dot(
-            (contact.b1->getInvInertiaTensor() * glm::cross(glm::cross(r1, t2), r1) +
-             contact.b2->getInvInertiaTensor() * glm::cross(glm::cross(r2, t2), r2)),
+            (iI1 * glm::cross(glm::cross(r1, t2), r1) +
+             iI2 * glm::cross(glm::cross(r2, t2), r2)),
             t2);
         J /= div;
 
-        // TODO: clamp acculuated value
-        //if (J < 0.0f)
-        //    J = 0.0f;
+        if (J < -fric_clamp)
+            J = -fric_clamp;
+        else if (J > fric_clamp)
+            J = fric_clamp;
 
-        contact.b1->addImpulse( J * t2, r1);
-        contact.b2->addImpulse(-J * t2, r2);
+        contact.b1->addImpulse(-J * t2, r1);
+        contact.b2->addImpulse( J * t2, r2);
     }*/
 }
 

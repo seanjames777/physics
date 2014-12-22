@@ -16,10 +16,9 @@ namespace Physics {
 
 class Body;
 
-// Contact position is implicitly b1.position + normal * depth
 // Normal points from b1 -> b2
 struct Contact {
-    glm::vec3  position; // TODO only used for visualization
+    glm::vec3  position;
     glm::vec3  normal;
     float      depth;
     Body      *b1;
