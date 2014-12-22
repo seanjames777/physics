@@ -30,14 +30,7 @@ add_library(util
     src/util/graphics/spheremesh.cpp
 )
 
-add_executable(demo1
-    src/demo1/main.cpp
-)
-
-# TODO: most of these should actually be linked by libutil
-target_link_libraries(demo1
-    physics
-    util
+target_link_libraries(util
     -framework\ OpenGL
     -lglew
     -lglfw
@@ -45,7 +38,13 @@ target_link_libraries(demo1
     -lfreetype
 )
 
+add_executable(demo1 src/demos/demo1.cpp)
+target_link_libraries(demo1 physics util)
 install(TARGETS demo1 DESTINATION bin/)
+
+add_executable(demo2 src/demos/demo2.cpp)
+target_link_libraries(demo2 physics util)
+install(TARGETS demo2 DESTINATION bin/)
 
 install(FILES content/shaders/phong.vs DESTINATION bin/content/shaders/)
 install(FILES content/shaders/phong.fs DESTINATION bin/content/shaders/)

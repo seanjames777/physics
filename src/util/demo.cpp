@@ -156,7 +156,7 @@ Demo::Demo(std::string title, int width, int height, int shadowSize, bool vsync)
 {
     glfwInit();
 
-    glfwWindowHint(GLFW_SAMPLES, 4);
+    glfwWindowHint(GLFW_SAMPLES, 0);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, true);
@@ -224,6 +224,7 @@ Demo::Demo(std::string title, int width, int height, int shadowSize, bool vsync)
 
     shadowTarget = std::make_shared<RenderTarget>(shadowSize, shadowSize, 0);
     shadowTarget->addColorTarget(GL_R32F, GL_LINEAR); // TODO format, filter
+    shadowTarget->addDepthStencilTarget(GL_DEPTH_COMPONENT24);
     shadowTarget->finish();
 
     debug_mesh = std::make_shared<Mesh>();
@@ -377,7 +378,7 @@ void Demo::draw() {
     font->drawString(debug_buff, 10, 10);
     font->flush(width, height);
 
-    //shadowTarget->blit(0, 0, 256, 256, 0);
+    shadowTarget->blit(0, 0, 300, 300, 0);
 }
 
 void Demo::updateCamera(double dt) {

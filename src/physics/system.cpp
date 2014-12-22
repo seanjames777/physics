@@ -10,16 +10,7 @@
 #include <physics/constraints/constraint.h>
 #include <iostream>
 
-// Physics notes:
-//
-//   x          (position)
-//   m          (mass)
-//   v = dx/dt  (velocity)
-//   a = dv/dt  (acceleration)
-//   F = m * a  (force)
-//   p = mv     (momentum)
-//   F = dp/dt
-//
+// TODO: constraints that don't require extra bodies
 
 namespace Physics {
 
