@@ -583,7 +583,9 @@ void Demo::prepDebug() {
 
         glm::vec3 p = contact.position;
 
-        vert.color = glm::vec4(1, 0, 0, 1);
+        glm::vec4 color = contact.bit ? glm::vec4(0, 1, 0, 1) : glm::vec4(1, 0, 0, 1);
+
+        vert.color = color;
         vert.position = p + glm::vec3(-diff, 0, 0);
         vertices.push_back(vert);
         vert.position = p + glm::vec3(diff, 0, 0);
@@ -599,6 +601,11 @@ void Demo::prepDebug() {
         vert.position = p + glm::vec3(0, 0, diff);
         vertices.push_back(vert);
 
+        vert.color = glm::vec4(1, 1, 1, 1);
+        vert.position = p;
+        vertices.push_back(vert);
+        vert.position = p + contact.rvel;
+        vertices.push_back(vert);
 
         indices.push_back(i0 + 0);
         indices.push_back(i0 + 1);
@@ -606,6 +613,10 @@ void Demo::prepDebug() {
         indices.push_back(i0 + 3);
         indices.push_back(i0 + 4);
         indices.push_back(i0 + 5);
+        indices.push_back(i0 + 6);
+        indices.push_back(i0 + 7);
+        //indices.push_back(i0 + 8);
+        //indices.push_back(i0 + 9);
     }
 
     debug_mesh->setVertices(&vertices[0], vertices.size());

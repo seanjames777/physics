@@ -23,6 +23,8 @@ struct Contact {
     float      depth;
     Body      *b1;
     Body      *b2;
+    bool bit;
+    glm::vec3 rvel;
 };
 
 class CollisionShape {

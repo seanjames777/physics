@@ -95,7 +95,7 @@ void System::resolveContact(Contact & contact) {
 
     float Jn = 0.0f;
 
-    // Normal constraint
+    // Relative velocity along normal should be zero
     {
         Jn = -(1.0f + elasticity) * vn + bias / step * contact.depth;
         float div = im1 + im2;
@@ -115,44 +115,65 @@ void System::resolveContact(Contact & contact) {
 
     float rv_len = glm::length(rvel);
 
-    if (vn == 0.0f)
-        return;
+    if (vn != 0.0f) {
+        glm::vec3 t = rvel - n * vn;
 
-    glm::vec3 t = rvel - n * vn;
+        float l = glm::length(t);
 
-    float l = glm::length(t);
+        if (l != 0.0f) {
+            t /= l;
 
-    if (l == 0.0f)
-        return;
+            const float fric_clamp = 0.9f * Jn;
 
-    t /= l;
+            glm::vec3 t1 = t;
+            //glm::vec3 t2 = glm::vec3(0, 0, 1);
 
-    const float fric_clamp = 0.9f * Jn;
+            //rvel = contact.b2->getVelocityAtPoint(r2) - contact.b1->getVelocityAtPoint(r1);
+            float vt1 = glm::dot(rvel, t1);
 
-    glm::vec3 t1 = t;
-    //glm::vec3 t2 = glm::vec3(0, 0, 1);
+            // Relative velocity off of normal should be zero
+            {
+                float J = -vt1;
+                float div = im1 + im2;
+                div += glm::dot(
+                    (iI1 * glm::cross(glm::cross(r1, t1), r1) +
+                     iI2 * glm::cross(glm::cross(r2, t1), r2)),
+                    t1);
+                J /= div;
 
-    //rvel = contact.b2->getVelocityAtPoint(r2) - contact.b1->getVelocityAtPoint(r1);
-    float vt1 = glm::dot(rvel, t1);
+                if (J < -fric_clamp)
+                    J = -fric_clamp;
+                else if (J > fric_clamp)
+                    J = fric_clamp;
 
-    // Tangent/friction constraint 1
-    {
-        float J = -vt1;
-        float div = im1 + im2;
-        div += glm::dot(
-            (iI1 * glm::cross(glm::cross(r1, t1), r1) +
-             iI2 * glm::cross(glm::cross(r2, t1), r2)),
-            t1);
-        J /= div;
-
-        if (J < -fric_clamp)
-            J = -fric_clamp;
-        else if (J > fric_clamp)
-            J = fric_clamp;
-
-        contact.b1->addImpulse(-J * t1, r1);
-        contact.b2->addImpulse( J * t1, r2);
+                contact.b1->addImpulse(-J * t1, r1);
+                contact.b2->addImpulse( J * t1, r2);
+            }
+        }
+        else {
+            // TODO
+        }
     }
+    else {
+        // TODO
+    }
+
+    // Relative angular velocity should be zero
+
+    // TODO figure something out for this. Damping sort of hides it for now...
+
+    /*glm::vec3 relAngVel = contact.b2->getAngularVelocity() - contact.b1->getAngularVelocity();
+
+    contact.rvel = contact.b2->getAngularVelocity();
+
+    float relAngN = glm::dot(relAngVel, n);
+    glm::vec3 relN = glm::normalize(relAngVel) * relAngN * .015f;
+
+    //contact.b1->addImpulse(glm::cross(-relN, r1), r1);
+    //contact.b2->addImpulse(glm::cross(relN, r2), r2);
+
+    contact.b1->addAngularVelocity(-relN);
+    contact.b2->addAngularVelocity( relN);
 
     //rvel = contact.b2->getVelocityAtPoint(r2) - contact.b1->getVelocityAtPoint(r1);
     /*float vt2 = glm::dot(rvel, t2);
