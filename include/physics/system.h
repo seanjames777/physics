@@ -12,12 +12,12 @@
 #include <glm/vec3.hpp>
 #include <vector>
 #include <memory>
+#include <physics/collision/collision.h>
 
 namespace Physics {
 
 class Body;
 class Constraint;
-class Contact;
 
 // TODO: Using shared pointer everywhere might hurt perf
 
@@ -26,6 +26,15 @@ class Contact;
  * their motion and forces.
  */
 class System {
+public:
+
+    // TODO ugly
+    struct ContactEx {
+        Collision::Contact  contact;
+        Body               *b1;
+        Body               *b2;
+    };
+
 private:
 
     std::vector<std::shared_ptr<Body>> bodies;
@@ -35,9 +44,9 @@ private:
     double accumTime;
     double time;
     double timeWarp; // TODO doubles are too big maybe
-    std::vector<Contact> contacts;
+    std::vector<ContactEx> contacts;
 
-    void resolveContact(Contact & contact);
+    void resolveContact(const ContactEx & contact);
 
 public:
 
@@ -60,7 +69,7 @@ public:
 
     void setGravity(glm::vec3 gravity);
 
-    std::vector<Contact> & getContacts(); // TODO
+    std::vector<ContactEx> & getContacts(); // TODO
 
     std::vector<std::shared_ptr<Body>> & getBodies();
 

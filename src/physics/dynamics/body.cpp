@@ -11,7 +11,7 @@
 
 namespace Physics {
 
-Body::Body(std::shared_ptr<CollisionShape> shape)
+Body::Body(std::shared_ptr<Shape> shape)
     : fixed(false),
       mass(1.0f),
       invMass(1.0f),
@@ -22,24 +22,28 @@ Body::Body(std::shared_ptr<CollisionShape> shape)
 Body::~Body() {
 }
 
-std::shared_ptr<CollisionShape> Body::getCollisionShape() {
+std::shared_ptr<Shape> Body::getShape() {
     return shape;
 }
 
-void Body::setCollisionShape(std::shared_ptr<CollisionShape> shape) {
+void Body::setShape(std::shared_ptr<Shape> shape) {
     this->shape = shape;
 }
 
 glm::vec3 Body::getPosition() {
-    return position;
+    return transform.position;
 }
 
 glm::vec3 Body::getLinearVelocity() {
     return linearVelocity;
 }
 
+Transform & Body::getTransform() {
+    return transform;
+}
+
 glm::quat Body::getOrientation() {
-    return orientation;
+    return transform.orientation;
 }
 
 glm::vec3 Body::getAngularVelocity() {
@@ -82,16 +86,16 @@ bool Body::getFixed() {
     return fixed;
 }
 
-glm::mat4 Body::getTransform() {
-    return glm::translate(glm::mat4(), position) * glm::mat4_cast(orientation);
+glm::mat4 Body::getLocalToWorld() {
+    return transform.getLocalToWorld();
 }
 
 void Body::setPosition(glm::vec3 position) {
-    this->position = position;
+    transform.position = position;
 }
 
 void Body::setOrientation(glm::quat orientation) {
-    this->orientation = orientation;
+    transform.orientation = orientation;
 }
 
 void Body::setLinearVelocity(glm::vec3 velocity) {
@@ -174,13 +178,18 @@ void Body::integrateVelocities(double dt) {
 }
 
 void Body::integrateTransform(double dt) {
-    position += linearVelocity * (float)dt;
+    transform.position += linearVelocity * (float)dt;
 
-    float angle = glm::length(angularVelocity);
+    glm::vec3 scaledAngularVelocity = angularVelocity;
+
+    float angle = glm::length(scaledAngularVelocity);
 
     if (angle != 0.0f) {
-        glm::vec3 axis = angularVelocity / angle;
-        orientation = glm::rotate(orientation, angle, axis);
+        glm::vec3 axis = scaledAngularVelocity / angle;
+
+        // TODO GLM is in degrees...
+        transform.orientation = glm::rotate(transform.orientation,
+            angle * 180.0f / (float)M_PI * (float)dt, axis);
     }
 }
 

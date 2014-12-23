@@ -7,6 +7,7 @@ set(CMAKE_CXX_FLAGS "-std=c++11 -fno-exceptions -O3")
 set(CMAKE_CXX_FLAGS "-I/usr/include -I/usr/local/include/ -I/opt/local/include/ -I/opt/local/include/freetype2/ ${CMAKE_CXX_FLAGS}")
 
 add_library(physics
+    src/physics/collision/collision.cpp
     src/physics/collision/planeshape.cpp
     src/physics/collision/shape.cpp
     src/physics/collision/sphereshape.cpp
@@ -15,6 +16,7 @@ add_library(physics
     src/physics/constraints/springconstraint.cpp
     src/physics/dynamics/body.cpp
     src/physics/system.cpp
+    src/physics/transform.cpp
 )
 
 add_library(util

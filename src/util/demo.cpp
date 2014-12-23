@@ -253,7 +253,7 @@ Demo::Demo(std::string title, int width, int height, int shadowSize, bool vsync)
 
 void Demo::updateDebugBuff() {
     // TODO changes quickly potentially
-    std::vector<Contact> & contacts_vec = system->getContacts();
+    std::vector<System::ContactEx> & contacts_vec = system->getContacts();
     std::vector<std::shared_ptr<Body>> & bodies = system->getBodies();
 
     contacts += contacts_vec.size();
@@ -282,7 +282,7 @@ void Demo::updateDebugBuff() {
     }
 
     sprintf(debug_buff,
-        "    Contacts: %ld\n"
+        "    Contacts: %d\n"
         "      Bodies: %ld\n"
         "  Frame Time: %.02f ms\n"
         "Physics Time: %.02f ms\n"
@@ -315,7 +315,7 @@ void Demo::draw() {
 
     for (auto & pair : meshes) {
         // TODO redundant
-        glm::mat4 world = pair.body->getTransform();
+        glm::mat4 world = pair.body->getLocalToWorld();
         glm::mat4 worldInverseTranspose = glm::inverse(glm::transpose(world));
         glm::mat4 worldViewProjection = camViewProjection * world;
         glm::mat4 lightWorldViewProjection = lightViewProjection * world;
@@ -367,7 +367,7 @@ void Demo::draw() {
 
     for (auto & pair : meshes) {
         // TODO redundant
-        glm::mat4 world = pair.body->getTransform();
+        glm::mat4 world = pair.body->getLocalToWorld();
 
         glm::mat4 worldInverseTranspose = glm::inverse(glm::transpose(world));
         glm::mat4 worldViewProjection = camViewProjection * world;
@@ -492,7 +492,7 @@ void Demo::prepDebug() {
         const float diff = 0.5f;
         int i0 = vertices.size();
 
-        glm::mat4 world = pair.body->getTransform();
+        glm::mat4 world = pair.body->getLocalToWorld();
 
         vert.color = glm::vec4(1, 1, 0, 1);
         vert.position = transform(world, glm::vec3(-diff, 0, 0));
@@ -549,7 +549,7 @@ void Demo::prepDebug() {
         indices.push_back(i0 + 10);
         indices.push_back(i0 + 11);
 
-        /*std::shared_ptr<CollisionShape> shape = pair.body->getCollisionShape();
+        /*std::shared_ptr<Shape> shape = pair.body->getShape();
 
         if (!shape)
             continue;
@@ -614,15 +614,15 @@ void Demo::prepDebug() {
         indices.push_back(i0 + 7);*/
     }
 
-    std::vector<Contact> & contacts = system->getContacts();
+    std::vector<System::ContactEx> & contacts = system->getContacts();
 
     for (auto & contact : contacts) {
         const float diff = 0.25f;
         int i0 = vertices.size();
 
-        glm::vec3 p = contact.position;
+        glm::vec3 p = contact.contact.position;
 
-        glm::vec4 color = contact.bit ? glm::vec4(0, 1, 0, 1) : glm::vec4(1, 0, 0, 1);
+        glm::vec4 color = glm::vec4(1, 0, 0, 1);
 
         vert.color = color;
         vert.position = p + glm::vec3(-diff, 0, 0);
@@ -640,10 +640,9 @@ void Demo::prepDebug() {
         vert.position = p + glm::vec3(0, 0, diff);
         vertices.push_back(vert);
 
-        vert.color = glm::vec4(1, 1, 1, 1);
         vert.position = p;
         vertices.push_back(vert);
-        vert.position = p + contact.rvel;
+        vert.position = p + contact.contact.normal * 2.0f;
         vertices.push_back(vert);
 
         indices.push_back(i0 + 0);
@@ -652,10 +651,8 @@ void Demo::prepDebug() {
         indices.push_back(i0 + 3);
         indices.push_back(i0 + 4);
         indices.push_back(i0 + 5);
-        indices.push_back(i0 + 6);
-        indices.push_back(i0 + 7);
-        //indices.push_back(i0 + 8);
-        //indices.push_back(i0 + 9);
+        //indices.push_back(i0 + 6);
+        //indices.push_back(i0 + 7);
     }
 
     debug_mesh->setVertices(&vertices[0], vertices.size());

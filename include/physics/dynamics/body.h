@@ -12,10 +12,11 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <memory>
+#include <physics/transform.h>
 
 namespace Physics {
 
-class CollisionShape;
+class Shape;
 
 class Body {
 private:
@@ -40,8 +41,7 @@ private:
     // be used to detect and correct collisions with other collision shapes
     // attached to bodies. TODO why not required.
 
-    glm::vec3 position;
-    glm::quat orientation;
+    Transform transform;
     glm::vec3 linearVelocity;
     glm::vec3 angularVelocity; // axis * angle
     glm::vec3 force;
@@ -49,21 +49,19 @@ private:
     bool      fixed;
     float     mass;
     float     invMass;
-    glm::mat3 inertiaTensor;
-    glm::mat3 invInertiaTensor;
-    std::shared_ptr<CollisionShape> shape;
+    glm::mat3 inertiaTensor; // TODO: Transform this when using it
+    glm::mat3 invInertiaTensor; // TODO: and this
+    std::shared_ptr<Shape> shape;
 
 public:
 
-    Body(std::shared_ptr<CollisionShape> shape = nullptr);
+    Body(std::shared_ptr<Shape> shape = nullptr);
 
     ~Body();
 
-    std::shared_ptr<CollisionShape> getCollisionShape();
+    std::shared_ptr<Shape> getShape();
 
-    void setCollisionShape(std::shared_ptr<CollisionShape> shape);
-
-    glm::mat4 getTransform();
+    void setShape(std::shared_ptr<Shape> shape);
 
     void setPosition(glm::vec3 position);
 
@@ -94,6 +92,10 @@ public:
     void addTorque(glm::vec3 torque);
 
     void addForce(glm::vec3 force, glm::vec3 relPos);
+
+    Transform & getTransform();
+
+    glm::mat4 getLocalToWorld();
 
     glm::vec3 getPosition();
 

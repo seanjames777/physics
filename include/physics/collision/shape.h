@@ -1,43 +1,70 @@
 /**
  * @file collisionshape.h
  *
- * @brief Shapes which can be checked for collisions
+ * @brief Shape which can be checked for collisions
  *
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#ifndef __COLLISIONSHAPE_H
-#define __COLLISIONSHAPE_H
-
-#include <glm/glm.hpp>
-#include <vector>
+#ifndef __SHAPE_H
+#define __SHAPE_H
 
 namespace Physics {
 
-class Body;
-
-// Normal points from b1 -> b2
-struct Contact {
-    glm::vec3  position;
-    glm::vec3  normal;
-    float      depth;
-    Body      *b1;
-    Body      *b2;
-    bool bit;
-    glm::vec3 rvel;
-};
-
-class CollisionShape {
+/**
+ * @brief Shape which can be checked for collision against other shapes. Shapes are
+ * attached to Bodies to provide collision geometry. This is an abstract base class
+ * for other Shapes.
+ *
+ * ShapeType is used to identify the types of shapes to determine which collision
+ * functions need to be called. Using an enumeration for this allows us to avoid
+ * requiring RTTI. Care has been taken to avoid virtual functions for performance
+ * reasons.
+ */
+class Shape {
 public:
 
-    CollisionShape();
+    /**
+     * @brief Shape types, used to avoid requiring RTTI
+     */
+    enum ShapeType {
+        // Note: When adding to this table, update dispatchTable in collision.cpp.
+        Sphere,  //!< Sphere shape type
+        Plane,   //!< Plane shape type
+        Cube,    //!< Cube shape type
+        Count    //!< Number of shapes
+    };
 
-    virtual ~CollisionShape() = 0;
+private:
 
-    virtual void checkCollision(CollisionShape *other, Body *b1, Body *b2,
-        std::vector<Contact> & contacts) = 0;
+    enum ShapeType shapeType; //!< Shape type
 
-    virtual void getBoundingBox(Body *body, glm::vec3 & min, glm::vec3 & max) = 0;
+public:
+
+    /**
+     * @brief Constructor
+     */
+    Shape(enum ShapeType type);
+
+    /**
+     * @brief Destructor
+     */
+    virtual ~Shape() = 0;
+
+    /**
+     * @brief Get this shape's type
+     */
+    enum ShapeType getShapeType() const;
+
+    /**
+     * @brief Get a bounding box for this shape. This function calls the
+     * central bounding box computation functions as a convenience. TODO inline
+     * this.
+     *
+     * @param[in]  t    Transform of the body corresponding to this shape
+     * @param[out] bbox Bounding box
+     */
+    // void getBoundingBox(const Transform & t, AABB & bbox);
 
 };
 

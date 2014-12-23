@@ -12,7 +12,8 @@
 namespace Physics {
 
 PlaneShape::PlaneShape(glm::vec3 normal, float dist)
-    : normal(normal),
+    : Shape(Shape::Plane),
+      normal(normal),
       dist(dist)
 {
 }
@@ -20,38 +21,17 @@ PlaneShape::PlaneShape(glm::vec3 normal, float dist)
 PlaneShape::~PlaneShape() {
 }
 
-glm::vec3 PlaneShape::getNormal() {
+glm::vec3 PlaneShape::getNormal() const {
     return normal;
 }
 
-float PlaneShape::getDistance() {
+float PlaneShape::getDistance() const {
     return dist;
 }
 
-void PlaneShape::checkCollision(CollisionShape *other, Body *b1, Body *b2,
-    std::vector<Contact> & contacts)
-{
-    Contact contact;
-
-    if (SphereShape *other_sphere = dynamic_cast<SphereShape *>(other)) {
-        glm::vec3 p2 = b2->getPosition();
-        float dist2 = glm::dot(p2, normal) - dist;
-
-        if (dist2 < other_sphere->getRadius()) {
-            contact.b1 = b1;
-            contact.b2 = b2;
-            contact.normal = normal;
-            contact.depth = other_sphere->getRadius() - dist2;
-            contact.position = p2 - normal * other_sphere->getRadius();
-
-            contacts.push_back(contact);
-        }
-    }
-}
-
-void PlaneShape::getBoundingBox(Body *body, glm::vec3 & min, glm::vec3 & max) {
+/*void PlaneShape::getBoundingBox(Transform & t, glm::vec3 & min, glm::vec3 & max) {
     min = glm::vec3(-1.0 / 0.0, 0.0f, -1.0 / 0.0); // TODO
     min = glm::vec3( 1.0 / 0.0, 0.0f,  1.0 / 0.0);
-}
+}*/
 
 }

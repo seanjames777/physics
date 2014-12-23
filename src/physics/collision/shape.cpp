@@ -8,15 +8,16 @@
 
 namespace Physics {
 
-CollisionShape::CollisionShape() {
-}
-
-CollisionShape::~CollisionShape() {
-}
-
-void CollisionShape::checkCollision(CollisionShape *other, Body *b1, Body *b2,
-    std::vector<Contact> & contacts)
+Shape::Shape(enum Shape::ShapeType shapeType)
+    : shapeType(shapeType)
 {
+}
+
+Shape::~Shape() {
+}
+
+enum Shape::ShapeType Shape::getShapeType() const {
+    return shapeType;
 }
 
 }

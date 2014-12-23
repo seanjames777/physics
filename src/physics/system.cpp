@@ -21,6 +21,7 @@ System::System()
       timeWarp(1.0),
       accumTime(0.0)
 {
+    Collision::initialize();
 }
 
 System::~System() {
@@ -54,7 +55,7 @@ void System::setTimeWarp(double timeWarp) {
 // TODO: Wrapper for addForce()
 // TODO: Test rest on ramp
 
-void System::resolveContact(Contact & contact) {
+void System::resolveContact(const ContactEx & contact) {
     // Bodies may be penetrating. We want to apply an impulse which will cause
     // them to separate. We also want to apply impulses which will eliminate
     // relative velocity tangent to the collision normal, simulating friction.
@@ -66,7 +67,7 @@ void System::resolveContact(Contact & contact) {
     float bias = 0.3f;       // Additional impulse along normal for separation
 
     // Position of contact relative to centers of mass
-    glm::vec3 p = contact.position;
+    glm::vec3 p = contact.contact.position;
     glm::vec3 r1 = p - contact.b1->getPosition();
     glm::vec3 r2 = p - contact.b2->getPosition();
 
@@ -79,16 +80,16 @@ void System::resolveContact(Contact & contact) {
     // Relative velocity along normal
     // Normal points from 1 -> 2
     glm::vec3 rvel = contact.b2->getVelocityAtPoint(r2) - contact.b1->getVelocityAtPoint(r1);
-    glm::vec3 n = contact.normal;
+    glm::vec3 n = contact.contact.normal;
     float vn = glm::dot(rvel, n);
 
-    if (contact.depth < 0.0f) contact.depth = 0.0f; // TODO
+    //if (contact.contact.depth < 0.0f) contact.contact.depth = 0.0f; // TODO
 
     float Jn = 0.0f;
 
     // Relative velocity along normal should be zero
     {
-        Jn = -(1.0f + elasticity) * vn + bias / step * contact.depth;
+        Jn = -(1.0f + elasticity) * vn + bias / step * contact.contact.depth;
         float div = im1 + im2;
         div += glm::dot(
             (iI1 * glm::cross(glm::cross(r1, n), r1) +
@@ -104,79 +105,29 @@ void System::resolveContact(Contact & contact) {
         contact.b2->addImpulse( Jn * n, r2);
     }
 
-    float rv_len = glm::length(rvel);
+    if (glm::length(rvel) == 0.0f)
+        return;
 
-    if (vn != 0.0f) {
-        glm::vec3 t = rvel - n * vn;
+    glm::vec3 t = rvel - n * vn;
+    float tl = glm::length(t);
 
-        float l = glm::length(t);
+    if (tl == 0.0f)
+        return;
 
-        if (l != 0.0f) {
-            t /= l;
+    t /= tl;
 
-            const float fric_clamp = 0.9f * Jn;
+    const float fric_clamp = 0.4f * Jn;
 
-            glm::vec3 t1 = t;
-            //glm::vec3 t2 = glm::vec3(0, 0, 1);
+    float vt = glm::dot(rvel, t);
 
-            //rvel = contact.b2->getVelocityAtPoint(r2) - contact.b1->getVelocityAtPoint(r1);
-            float vt1 = glm::dot(rvel, t1);
-
-            // Relative velocity off of normal should be zero
-            {
-                float J = -vt1;
-                float div = im1 + im2;
-                div += glm::dot(
-                    (iI1 * glm::cross(glm::cross(r1, t1), r1) +
-                     iI2 * glm::cross(glm::cross(r2, t1), r2)),
-                    t1);
-                J /= div;
-
-                if (J < -fric_clamp)
-                    J = -fric_clamp;
-                else if (J > fric_clamp)
-                    J = fric_clamp;
-
-                contact.b1->addImpulse(-J * t1, r1);
-                contact.b2->addImpulse( J * t1, r2);
-            }
-        }
-        else {
-            // TODO
-        }
-    }
-    else {
-        // TODO
-    }
-
-    // Relative angular velocity should be zero
-
-    // TODO figure something out for this. Damping sort of hides it for now...
-
-    /*glm::vec3 relAngVel = contact.b2->getAngularVelocity() - contact.b1->getAngularVelocity();
-
-    contact.rvel = contact.b2->getAngularVelocity();
-
-    float relAngN = glm::dot(relAngVel, n);
-    glm::vec3 relN = glm::normalize(relAngVel) * relAngN * .015f;
-
-    //contact.b1->addImpulse(glm::cross(-relN, r1), r1);
-    //contact.b2->addImpulse(glm::cross(relN, r2), r2);
-
-    contact.b1->addAngularVelocity(-relN);
-    contact.b2->addAngularVelocity( relN);
-
-    //rvel = contact.b2->getVelocityAtPoint(r2) - contact.b1->getVelocityAtPoint(r1);
-    /*float vt2 = glm::dot(rvel, t2);
-
-    // Tangent/friction constraint 1
+    // Relative velocity off of normal should be zero
     {
-        float J = -vt2;
+        float J = -vt;
         float div = im1 + im2;
         div += glm::dot(
-            (iI1 * glm::cross(glm::cross(r1, t2), r1) +
-             iI2 * glm::cross(glm::cross(r2, t2), r2)),
-            t2);
+            (iI1 * glm::cross(glm::cross(r1, t), r1) +
+             iI2 * glm::cross(glm::cross(r2, t), r2)),
+            t);
         J /= div;
 
         if (J < -fric_clamp)
@@ -184,9 +135,9 @@ void System::resolveContact(Contact & contact) {
         else if (J > fric_clamp)
             J = fric_clamp;
 
-        contact.b1->addImpulse(-J * t2, r1);
-        contact.b2->addImpulse( J * t2, r2);
-    }*/
+        contact.b1->addImpulse(-J * t, r1);
+        contact.b2->addImpulse( J * t, r2);
+    }
 }
 
 void System::integrate(double t, double dt) {
@@ -206,23 +157,29 @@ void System::integrate(double t, double dt) {
         // TODO: check if vector re-allocates every time
 
         Body *b1, *b2;
-        CollisionShape *s1, *s2;
+        Shape *s1, *s2;
 
         // Using standard pointers here to avoid shared pointer overhead. This
         // is totally internal so isn't a problem for now.
         for (int i = 0; i < bodies.size(); i++) {
             b1 = bodies[i].get();
 
-            if ((s1 = b1->getCollisionShape().get()) == nullptr)
+            if ((s1 = b1->getShape().get()) == nullptr)
                 continue;
 
             for (int j = i + 1; j < bodies.size(); j++) {
                 b2 = bodies[j].get();
 
-                if ((s2 = b2->getCollisionShape().get()) == nullptr)
+                if ((s2 = b2->getShape().get()) == nullptr)
                     continue;
 
-                s1->checkCollision(s2, b1, b2, contacts);
+                ContactEx contact;
+                contact.b1 = b1;
+                contact.b2 = b2;
+
+                if (Collision::checkCollision(*s1, *s2, b1->getTransform(),
+                    b2->getTransform(), contact.contact))
+                    contacts.push_back(contact);
             }
         }
 
@@ -242,7 +199,7 @@ void System::integrate(double t, double dt) {
     }
 }
 
-std::vector<Contact> & System::getContacts() {
+std::vector<System::ContactEx> & System::getContacts() {
     return contacts;
 }
 

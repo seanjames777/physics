@@ -10,10 +10,11 @@
 #define __PLANESHAPE_H
 
 #include <physics/collision/shape.h>
+#include <glm/glm.hpp>
 
 namespace Physics {
 
-class PlaneShape : public CollisionShape {
+class PlaneShape : public Shape {
 private:
 
     glm::vec3 normal;
@@ -25,14 +26,10 @@ public:
 
     ~PlaneShape();
 
-    glm::vec3 getNormal();
+    glm::vec3 getNormal() const;
 
-    float getDistance();
+    float getDistance() const;
 
-    virtual void checkCollision(CollisionShape *other, Body *b1, Body *b2,
-        std::vector<Contact> & contacts) override;
-
-    virtual void getBoundingBox(Body *body, glm::vec3 & min, glm::vec3 & max) override;
 };
 
 }

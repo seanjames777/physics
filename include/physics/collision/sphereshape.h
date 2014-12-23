@@ -13,7 +13,7 @@
 
 namespace Physics {
 
-class SphereShape : public CollisionShape {
+class SphereShape : public Shape {
 private:
 
     float r;
@@ -24,12 +24,8 @@ public:
 
     ~SphereShape();
 
-    float getRadius();
+    float getRadius() const;
 
-    virtual void checkCollision(CollisionShape *other, Body *b1, Body *b2,
-        std::vector<Contact> & contacts) override;
-
-    virtual void getBoundingBox(Body *body, glm::vec3 & min, glm::vec3 & max) override;
 };
 
 }

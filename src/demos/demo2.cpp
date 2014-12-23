@@ -39,7 +39,7 @@ protected:
         auto quadBody = std::make_shared<Body>();
         quadBody->setPosition(glm::vec3(0, 0, 0));
         quadBody->setFixed(true);
-        quadBody->setCollisionShape(std::make_shared<PlaneShape>(glm::vec3(0, 1, 0), 0));
+        quadBody->setShape(std::make_shared<PlaneShape>(glm::vec3(0, 1, 0), 0));
         addMesh(std::make_shared<PlaneMesh>(40, 40), quadBody);
         system->addBody(quadBody);
 
@@ -47,33 +47,33 @@ protected:
         cam->setYaw(193);
         cam->setPitch(10);
 
-        auto sphereBody = std::make_shared<Body>();
-        getSystem()->addBody(sphereBody);
-        sphereBody->setPosition(glm::vec3(0, 2, 5));
-        sphereBody->setCollisionShape(std::make_shared<SphereShape>(2.0f));
-        sphereBody->setMass(1.0f);
-        float I = 2.0f * 1.0f * 2.0f * 2.0f / 5.0f;
-        sphereBody->setInertiaTensor(glm::mat3(I, 0, 0, 0, I, 0, 0, 0, I));
-        addMesh(std::make_shared<SphereMesh>(30, 15, 2.0f), sphereBody);
+        auto cubeBody = std::make_shared<Body>();
+        getSystem()->addBody(cubeBody);
+        cubeBody->setPosition(glm::vec3(0, 2, 5));
+        cubeBody->setShape(std::make_shared<SphereShape>(2.0f));
+        cubeBody->setMass(1.0f);
+        float I = 2.0f / 3.0f;
+        cubeBody->setInertiaTensor(glm::mat3(I, 0, 0, 0, I, 0, 0, 0, I));
+        addMesh(std::make_shared<CubeMesh>(2, 2, 2), cubeBody);
 
-        /*sphereBody->addImpulse(glm::vec3(-8, 0, 0), glm::vec3(0, 1.0f, -1));
-        sphereBody->addImpulse(glm::vec3( 8, 0, 0), glm::vec3(0, 1.0f,  1));
-        sphereBody->addImpulse(glm::vec3( 0, 0, 10), glm::vec3(0, 2.0f,  0));*/
+        //cubeBody->addImpulse(glm::vec3(-8, 0, 0), glm::vec3(0, 1.0f, -1));
+        //cubeBody->addImpulse(glm::vec3( 8, 0, 0), glm::vec3(0, 1.0f,  1));
+        //cubeBody->addImpulse(glm::vec3( 0, 0, 10), glm::vec3(0, 2.0f,  0));
     }
 
     virtual void demo_mouseDown(int button) {
         if (button == 1) {
             std::shared_ptr<Camera> cam = getCamera();
 
-            auto sphereBody = std::make_shared<Body>();
-            getSystem()->addBody(sphereBody);
-            sphereBody->setPosition(cam->getPosition());
-            sphereBody->setLinearVelocity(glm::normalize(cam->getTarget() - cam->getPosition()) * 100.0f);
-            sphereBody->setCollisionShape(std::make_shared<SphereShape>(3.0f));
-            sphereBody->setMass(5.0f);
-            float I = 2.0f * 5.0f * 3.0f * 3.0f / 5.0f;
-            sphereBody->setInertiaTensor(glm::mat3(I, 0, 0, 0, I, 0, 0, 0, I));
-            addMesh(std::make_shared<SphereMesh>(30, 15, 3.0f), sphereBody);
+            auto cubeBody = std::make_shared<Body>();
+            getSystem()->addBody(cubeBody);
+            cubeBody->setPosition(cam->getPosition());
+            cubeBody->setLinearVelocity(glm::normalize(cam->getTarget() - cam->getPosition()) * 60.0f);
+            cubeBody->setShape(std::make_shared<SphereShape>(2.0f));
+            cubeBody->setMass(3.0f);
+            float I = 2.0f / 3.0f;
+            cubeBody->setInertiaTensor(glm::mat3(I, 0, 0, 0, I, 0, 0, 0, I));
+            addMesh(std::make_shared<CubeMesh>(2, 2, 2), cubeBody);
         }
     }
 
