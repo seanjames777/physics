@@ -4,7 +4,7 @@ project(physics)
 include_directories(include/)
 
 set(CMAKE_CXX_FLAGS "-std=c++11 -fno-exceptions -O3")
-set(CMAKE_CXX_FLAGS "-I/opt/local/include/freetype2/ ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "-I/usr/include -I/usr/local/include/ -I/opt/local/include/ -I/opt/local/include/freetype2/ ${CMAKE_CXX_FLAGS}")
 
 add_library(physics
     src/physics/collision/planeshape.cpp
@@ -30,6 +30,7 @@ add_library(util
     src/graphics/shader.cpp
     src/graphics/spheremesh.cpp
     src/graphics/texture.cpp
+    src/graphics/textureutil.cpp
 )
 
 target_link_libraries(util
@@ -38,6 +39,8 @@ target_link_libraries(util
     -lglfw
     -L/opt/local/lib/
     -lfreetype
+    -lpng
+    -ljpeg
 )
 
 add_executable(demo1 src/demos/demo1.cpp)
@@ -57,3 +60,4 @@ install(FILES content/shaders/flat.fs DESTINATION bin/content/shaders/)
 install(FILES content/shaders/font.vs DESTINATION bin/content/shaders/)
 install(FILES content/shaders/font.fs DESTINATION bin/content/shaders/)
 install(FILES content/fonts/consolas_bold.ttf DESTINATION bin/content/fonts/)
+install(FILES content/textures/checker.jpg DESTINATION bin/content/textures/)

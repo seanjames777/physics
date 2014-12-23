@@ -17,6 +17,7 @@
 #include <graphics/rendertarget.h>
 #include <graphics/shader.h>
 #include <graphics/texture.h>
+#include <graphics/textureutil.h>
 #include <iostream>
 #include <physics/collision/shape.h>
 #include <physics/dynamics/body.h>
@@ -239,27 +240,10 @@ Demo::Demo(std::string title, int width, int height, int shadowSize, bool vsync)
 
     const int TEX_SIZE = 1024;
     const int TEX_CELL = 128;
-    texture = std::make_shared<Texture>(TEX_SIZE, TEX_SIZE, GL_RGB, GL_UNSIGNED_BYTE, 6);
 
-    unsigned char *pixels = new unsigned char[TEX_SIZE * TEX_SIZE * 3];
-
-    for (int y = 0; y < TEX_SIZE; y++) {
-        for (int x = 0; x < TEX_SIZE; x++) {
-            int i0 = (y * TEX_SIZE + x) * 3;
-
-            int cellX = (x / TEX_CELL) % 2;
-            int cellY = (y / TEX_CELL) % 2;
-            int color = cellX ^ cellY;
-
-            pixels[i0 + 0] = color ? 121 : 121 * 3 / 5;
-            pixels[i0 + 1] = color ? 181 : 181 * 3 / 5;
-            pixels[i0 + 2] = color ? 255 : 255 * 3 / 5;
-        }
-    }
-
-    texture->setData(pixels, GL_RGB);
-
-    delete [] pixels;
+    std::shared_ptr<TextureData> texData = TextureUtil::loadJPEG("content/textures/checker.jpg");
+    texture = TextureUtil::createTextureFromTextureData(texData, GL_RGB, 6);
+    //texture = std::make_shared<Texture>(16, 16, GL_RGBA, GL_UNSIGNED_BYTE, 1);
 
     memset(keys, 0, sizeof(keys));
 }
