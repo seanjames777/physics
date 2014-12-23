@@ -86,6 +86,7 @@ private:
     double                              timeWarp;              //!< Physics time scale
     bool                                pausePhysics;          //!< Whether simulation is paused
     int                                 keys[MAX_KEY / sizeof(int)]; //!< TODO
+    bool                                wireframe;
 
     /**
      * @brief Handle window resize events

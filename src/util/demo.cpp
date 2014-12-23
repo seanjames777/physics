@@ -100,6 +100,8 @@ void Demo::keyHandler(GLFWwindow *window, int key, int scanCode, int action, int
             demo->timeWarp += (key == GLFW_KEY_LEFT_BRACKET ? -0.05 : 0.05);
             demo->system->setTimeWarp(demo->pausePhysics ? 0.0 : demo->timeWarp);
         }
+        else if (key == GLFW_KEY_P)
+            demo->wireframe = !demo->wireframe;
     }
     else if (action == GLFW_RELEASE) {
         demo->keys[bucket] &= ~(1 << idx);
@@ -159,7 +161,8 @@ Demo::Demo(std::string title, int width, int height, int shadowSize, bool vsync)
       mouseY(0),
       mouseButtons(0),
       timeWarp(1.0),
-      pausePhysics(false)
+      pausePhysics(false),
+      wireframe(false)
 {
     glfwInit();
 
@@ -359,6 +362,9 @@ void Demo::draw() {
     texture->bind(0);
     shadowTarget->bindColorTexture(1, 0);
 
+    if (wireframe)
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
     for (auto & pair : meshes) {
         // TODO redundant
         glm::mat4 world = pair.body->getTransform();
@@ -381,6 +387,9 @@ void Demo::draw() {
 
         pair.mesh->draw();
     }
+
+    if (wireframe)
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     texture->unbind(0);
     shadowTarget->unbindColorTexture(1);

@@ -34,7 +34,7 @@ SphereMesh::SphereMesh(int nu, int nv, float r)
     for (int y = 0; y < nv; y++) {
         float v = (float)(y + 1) / (float)(nv + 1);
 
-        for (int x = 0; x < nu; x++) {
+        for (int x = 0; x <= nu; x++) {
             float u = (float)x / (float)nu;
 
             vertex.position = spherePos(u, v, r);
@@ -53,18 +53,18 @@ SphereMesh::SphereMesh(int nu, int nv, float r)
     for (int x = 0; x < nu; x++) {
         indices.push_back(0);
         indices.push_back(x + 1);
-        indices.push_back((x + 1) % nu + 1);
+        indices.push_back(x + 2);
     }
 
     for (int y = 0; y < nv - 1; y++) {
-        int y0 = y * nu + 1;
-        int y1 = (y + 1) * nu + 1;
+        int y0 = y * (nu + 1) + 1;
+        int y1 = (y + 1) * (nu + 1) + 1;
 
         for (int x = 0; x < nu; x++) {
             int i00 = y0 + x;
-            int i01 = y0 + (x + 1) % nu;
+            int i01 = y0 + x + 1;
             int i10 = y1 + x;
-            int i11 = y1 + (x + 1) % nu;
+            int i11 = y1 + x + 1;
 
             indices.push_back(i00);
             indices.push_back(i10);
@@ -75,12 +75,12 @@ SphereMesh::SphereMesh(int nu, int nv, float r)
         }
     }
 
-    int i0 = (nv - 1) * nu + 1;
-    int i2 = nv * nu + 1;
+    int i0 = (nv - 1) * (nu + 1) + 1;
+    int i2 = nv * (nu + 1) + 1;
 
     for (int x = 0; x < nu; x++) {
         indices.push_back(i0 + x);
-        indices.push_back(i0 + (x + 1) % nu);
+        indices.push_back(i0 + x + 1);
         indices.push_back(i2);
     }
 
