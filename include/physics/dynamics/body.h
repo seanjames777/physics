@@ -9,10 +9,8 @@
 #ifndef __BODY_H
 #define __BODY_H
 
-#include <glm/glm.hpp>
-#include <glm/gtc/quaternion.hpp>
-#include <memory>
 #include <physics/transform.h>
+#include <memory>
 
 namespace Physics {
 

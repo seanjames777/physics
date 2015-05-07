@@ -11,12 +11,10 @@
 
 #include <memory>
 #include <vector>
-#include <glm/glm.hpp>
 #include <string>
+#include <util/gldefs.h>
 
-class GLFWwindow;
-
-namespace Graphics {
+struct GLFWwindow;
 
 class Mesh;
 class RenderTarget;
@@ -24,8 +22,7 @@ class Shader;
 class FPSCamera;
 class Font;
 class Texture;
-
-}
+class Buffer;
 
 namespace Physics {
 
@@ -34,8 +31,6 @@ class Body;
 class Contact;
 
 namespace Util {
-
-using namespace Graphics; // TODO
 
 #define MAX_KEY (11*32)
 
@@ -50,6 +45,17 @@ private:
         std::shared_ptr<Body> body;
     };
 
+#pragma pack(push, 1)
+    struct SceneUniforms {
+        glm::mat4 viewProjection;
+        glm::mat4 lightViewProjection;
+        glm::vec3 lightDirection;
+        int       depthTextureSize;
+    };
+#pragma pack(pop)
+
+    SceneUniforms sceneUniforms;
+
     int                                 width;                 //!< Window width
     int                                 height;                //!< Window height
     int                                 shadowSize;            //!< Shadow map width and height
@@ -62,14 +68,14 @@ private:
     std::shared_ptr<Texture>            texture;
     std::shared_ptr<FPSCamera>          camera;                //!< Camera
     std::shared_ptr<System>             system;                //!< Physics system
+    std::shared_ptr<Buffer>             uniformBuffer;
     double                              time;                  //!< Current time
     double                              debug_time;            //!< Time debug string last updated
     std::vector<MeshBodyPair>           meshes;                //!< List of meshes to draw
-    glm::vec3                           lightDir;              //!< Global light direction
     float                               shadowBounds;          //!< Shadow view rectangle width/height
     float                               shadowNear;            //!< Shadow near plane
     float                               shadowFar;             //!< Shadow far plane
-    glm::mat4                           lightViewProjection;   //!< Shadow view * projectionm matrix
+    std::shared_ptr<Texture>            shadowTex;             //!< Shadow render texture
     std::shared_ptr<RenderTarget>       shadowTarget;          //!< Shadow render target
     std::shared_ptr<Mesh>               debug_mesh;            //!< Debug visualization mesh
     char                                debug_buff[1024];      //!< Debug string TODO big
@@ -198,8 +204,8 @@ public:
     /**
      * @brief Constructor
      */
-    Demo(std::string title = "Physics Demo", int width = 1280,
-        int height = 720, int shadowSize = 1024, bool vsync = true);
+    Demo(char *executable, std::string title = "Physics Demo", int width = 1820,
+        int height = 1024, int shadowSize = 1024, bool vsync = false);
 
     /**
      * @brief Run demo to completion

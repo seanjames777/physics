@@ -170,8 +170,8 @@ void Body::integrateVelocities(double dt) {
     addAngularVelocity(invInertiaTensor * torque * (float)dt);
 
     // TODO damping factor
-    linearVelocity *= 1.0f - 0.1f * dt;
-    angularVelocity *= 1.0f - 0.1f * dt;
+    //linearVelocity *= 1.0f - 0.1f * dt;
+    //angularVelocity *= 1.0f - 0.1f * dt;
 
     force = glm::vec3();
     torque = glm::vec3();

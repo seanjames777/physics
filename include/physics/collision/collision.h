@@ -28,6 +28,15 @@ struct Contact {
 };
 
 /**
+ * @brief Contact manifold, which collects a set of contact points
+ */
+/*struct Manifold {
+    Body                 *b1;       //!< First body
+    Body                 *b2;       //!< Second body
+    std::vector<Contact>  contacts; //!< Set of contacts
+};*/
+
+/**
  * @brief Initialize collision system. This can safely be called more than once.
  */
 void initialize(); // TODO static?

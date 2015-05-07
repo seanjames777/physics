@@ -7,10 +7,8 @@
  */
 
 #include <util/demo.h>
-#include <graphics/planemesh.h>
-#include <graphics/spheremesh.h>
-#include <graphics/cubemesh.h>
-#include <graphics/fpscamera.h>
+#include <util/geometrybuilder.h>
+#include <util/camera.h>
 #include <physics/constraints/springconstraint.h>
 #include <physics/constraints/rodconstraint.h>
 #include <physics/collision/sphereshape.h>
@@ -24,8 +22,8 @@ using namespace Physics::Util;
 class Demo1 : public Demo {
 public:
 
-    Demo1()
-        : Demo("Stacking Demo")
+    Demo1(char *executable)
+        : Demo(executable, "Stacking Demo")
     {
     }
 
@@ -40,7 +38,7 @@ protected:
         quadBody->setPosition(glm::vec3(0, 0, 0));
         quadBody->setFixed(true);
         quadBody->setShape(std::make_shared<PlaneShape>(glm::vec3(0, 1, 0), 0));
-        addMesh(std::make_shared<PlaneMesh>(40, 40), quadBody);
+        addMesh(GeometryBuilder::createPlane(40, 40), quadBody);
         system->addBody(quadBody);
 
         int N = 15;
@@ -65,18 +63,18 @@ protected:
                 if (j == 0 && (i == 0 || i == N - j - 1))
                     sphereBody->setFixed(true);
 
-                addMesh(std::make_shared<SphereMesh>(30, 15, 1.0f), sphereBody);
+                addMesh(GeometryBuilder::createSphere(30, 15, 1.0f), sphereBody);
             }
         }
 
         cam->setPosition(glm::vec3(10, 20, 40));
-        cam->setYaw(193);
-        cam->setPitch(10);
+        cam->setYaw(-(float)M_PI / 180.0f * 170.0f);
+        cam->setPitch((float)M_PI / 180.0f * 10.0f);
     }
 
     virtual void demo_mouseDown(int button) {
         if (button == 1) {
-            std::shared_ptr<Camera> cam = getCamera();
+            std::shared_ptr<FPSCamera> cam = getCamera();
 
             auto sphereBody = std::make_shared<Body>();
             getSystem()->addBody(sphereBody);
@@ -86,7 +84,7 @@ protected:
             sphereBody->setMass(5.0f);
             float I = 2.0f * 5.0f * 3.0f * 3.0f / 5.0f;
             sphereBody->setInertiaTensor(glm::mat3(I, 0, 0, 0, I, 0, 0, 0, I));
-            addMesh(std::make_shared<SphereMesh>(30, 15, 3.0f), sphereBody);
+            addMesh(GeometryBuilder::createSphere(30, 15, 3.0f), sphereBody);
         }
     }
 
@@ -96,6 +94,6 @@ protected:
 };
 
 int main(int argc, char *argv[]) {
-    Demo1 demo1;
+    Demo1 demo1(argv[0]);
     demo1.run();
 }

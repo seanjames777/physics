@@ -5,9 +5,6 @@
  */
 
 #include <physics/collision/sphereshape.h>
-#include <iostream> // TODO
-#include <physics/dynamics/body.h>
-#include <physics/collision/planeshape.h>
 
 namespace Physics {
 

@@ -11,15 +11,16 @@
 #include <iostream>
 
 // TODO: constraints that don't require extra bodies
+// TODO: Categories of physics things
 
 namespace Physics {
 
 System::System()
     : gravity(glm::vec3(0, -9.8f, 0)),
-      step(1.0 / 60.0),
+      step(1.0 / 1000.0),
+      accumTime(0.0),
       time(0.0),
-      timeWarp(1.0),
-      accumTime(0.0)
+      timeWarp(1.0)
 {
     Collision::initialize();
 }
@@ -63,8 +64,8 @@ void System::resolveContact(const ContactEx & contact) {
     // approach a stable set of impulses. We need to separate objects and
     // apply friction but also keep stacks stable.
 
-    float elasticity = 0.1f; // "Bounciness" or coefficient of restitution
-    float bias = 0.3f;       // Additional impulse along normal for separation
+    float elasticity = 0.7f; // "Bounciness" or coefficient of restitution
+    float bias = 0.01f;       // Additional impulse along normal for separation
 
     // Position of contact relative to centers of mass
     glm::vec3 p = contact.contact.position;
@@ -83,13 +84,15 @@ void System::resolveContact(const ContactEx & contact) {
     glm::vec3 n = contact.contact.normal;
     float vn = glm::dot(rvel, n);
 
-    //if (contact.contact.depth < 0.0f) contact.contact.depth = 0.0f; // TODO
+    float depth = contact.contact.depth;
+
+    if (depth < 0.0f) depth = 0.0f;
 
     float Jn = 0.0f;
 
     // Relative velocity along normal should be zero
     {
-        Jn = -(1.0f + elasticity) * vn + bias / step * contact.contact.depth;
+        Jn = -(1.0f + elasticity) * vn + bias / step * depth;
         float div = im1 + im2;
         div += glm::dot(
             (iI1 * glm::cross(glm::cross(r1, n), r1) +
@@ -108,6 +111,7 @@ void System::resolveContact(const ContactEx & contact) {
     if (glm::length(rvel) == 0.0f)
         return;
 
+    rvel = contact.b2->getVelocityAtPoint(r2) - contact.b1->getVelocityAtPoint(r1);
     glm::vec3 t = rvel - n * vn;
     float tl = glm::length(t);
 
@@ -135,8 +139,8 @@ void System::resolveContact(const ContactEx & contact) {
         else if (J > fric_clamp)
             J = fric_clamp;
 
-        contact.b1->addImpulse(-J * t, r1);
-        contact.b2->addImpulse( J * t, r2);
+        //contact.b1->addImpulse(-J * t, r1);
+        //contact.b2->addImpulse( J * t, r2);
     }
 }
 

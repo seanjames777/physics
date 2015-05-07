@@ -1,9 +1,14 @@
 #version 410 core
 
-uniform sampler2D depthTexture;
+layout(std140) uniform SceneUniforms {
+    mat4 viewProjection;
+    mat4 lightViewProjection;
+    vec3 lightDirection;
+    int  depthTextureSize;
+};
+
 uniform sampler2D diffuseTexture;
-uniform vec3 lightDirection;
-uniform int depthTextureSize;
+uniform sampler2D depthTexture;
 
 in vec4 var_lightPosition;
 in vec3 var_normal;
@@ -47,4 +52,6 @@ void main() {
     vec4 diffuse = texture(diffuseTexture, var_uv);
 
     out_color = vec4(diffuse.rgb * lambert, 1);
+
+    //out_color = vec4(vec3(actual_depth), 1);
 }

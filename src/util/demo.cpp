@@ -8,22 +8,18 @@
 #include <functional>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <graphics/font.h>
-#include <graphics/fpscamera.h>
-#include <graphics/mesh.h>
-#include <graphics/rendertarget.h>
-#include <graphics/shader.h>
-#include <graphics/texture.h>
-#include <graphics/textureutil.h>
+#include <util/texture.h>
+#include <util/rendertarget.h>
+#include <util/shader.h>
+#include <util/camera.h>
+#include <util/mesh.h>
 #include <iostream>
 #include <physics/collision/shape.h>
 #include <physics/dynamics/body.h>
 #include <physics/system.h>
 #include <sys/time.h>
 #include <util/demo.h>
+#include <unistd.h>
 
 using namespace std::placeholders;
 
@@ -69,7 +65,7 @@ void Demo::mouseButtonHandler(GLFWwindow *window, int button, int action, int mo
 void Demo::mouseMoveHandler(GLFWwindow *window, double x, double y) {
     Demo *demo = (Demo *)glfwGetWindowUserPointer(window);
 
-    const float sensitivity = 0.1f;
+    const float sensitivity = 0.0075f;
     float dx = x - demo->mouseX;
     float dy = y - demo->mouseY;
 
@@ -131,7 +127,7 @@ void Demo::addMesh(std::shared_ptr<Mesh> mesh, std::shared_ptr<Body> body) {
     meshes.push_back(pair);
 }
 
-Demo::Demo(std::string title, int width, int height, int shadowSize, bool vsync)
+Demo::Demo(char *executable, std::string title, int width, int height, int shadowSize, bool vsync)
     : width(width),
       height(height),
       shadowSize(shadowSize),
@@ -145,7 +141,6 @@ Demo::Demo(std::string title, int width, int height, int shadowSize, bool vsync)
       system(nullptr),
       time(0.0),
       debug_time(0.0),
-      lightDir(glm::normalize(glm::vec3(0.8f, 1.0f, 0.6f))),
       shadowBounds(50.0f),
       shadowNear(-50.0f),
       shadowFar(50.0f),
@@ -164,6 +159,23 @@ Demo::Demo(std::string title, int width, int height, int shadowSize, bool vsync)
       pausePhysics(false),
       wireframe(false)
 {
+    #define BUFFSZ 512
+    char buffer[BUFFSZ];
+    getcwd(buffer, BUFFSZ);
+    strcat(buffer, "/");
+    memcpy(strlen(buffer) + buffer, executable, strlen(executable) + 1);
+
+    int i = 0, j;
+    for (j = 0; buffer[j] != '\0'; j++)
+        if (buffer[j] == '/')
+            i = j;
+
+    buffer[i+1] = '\0';
+
+    std::cout << buffer << std::endl;
+
+    chdir(buffer);
+
     glfwInit();
 
     glfwWindowHint(GLFW_SAMPLES, 4);
@@ -172,6 +184,7 @@ Demo::Demo(std::string title, int width, int height, int shadowSize, bool vsync)
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, true);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_DEPTH_BITS, 24);
+    glfwWindowHint(GLFW_SRGB_CAPABLE, true);
 
     window = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
     glfwMakeContextCurrent(window);
@@ -188,67 +201,101 @@ Demo::Demo(std::string title, int width, int height, int shadowSize, bool vsync)
     glewInit();
     glGetError(); // Eat spurious error
 
+    printf("OpenGL Renderer\n");
+    printf("Vendor:       %s\n", glGetString(GL_VENDOR));
+    printf("Renderer:     %s\n", glGetString(GL_RENDERER));
+    printf("Version:      %s\n", glGetString(GL_VERSION));
+    printf("GLSL Version: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
+
+    int num_extensions;
+    glGetIntegerv(GL_NUM_EXTENSIONS, &num_extensions);
+    printf("Extensions: %d\n", num_extensions);
+
+    for (int i = 0; i < num_extensions; i++)
+        printf("  %s\n", glGetStringi(GL_EXTENSIONS, i));
+
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE); // TODO
-    //glEnable(GL_MULTISAMPLE);
+    glEnable(GL_MULTISAMPLE);
+    glEnable(GL_FRAMEBUFFER_SRGB);
 
     glfwSwapInterval(vsync ? 1 : 0);
 
     phong_shader = std::make_shared<Shader>();
-    bool stat = false;
-    stat = phong_shader->setVS("content/shaders/phong.vs");
-    assert(stat);
-    stat = phong_shader->setFS("content/shaders/phong.fs");
-    assert(stat);
-    stat = phong_shader->link();
-    assert(stat);
+    phong_shader->setStage(ShaderStageVS, "content/shaders/phong.vs");
+    phong_shader->setStage(ShaderStageFS, "content/shaders/phong.fs");
+    phong_shader->finish();
+    assert(!phong_shader->error());
+
+    phong_shader->setUniformBufferBinding("SceneUniforms", 0);
+    phong_shader->setUniformBufferBinding("MeshUniforms", 1);
+    phong_shader->setTextureBinding("diffuseTexture", 0);
+    phong_shader->setTextureBinding("depthTexture", 1);
 
     shadow_shader = std::make_shared<Shader>();
-    stat = false;
-    stat = shadow_shader->setVS("content/shaders/shadow.vs");
-    assert(stat);
-    stat = shadow_shader->setFS("content/shaders/shadow.fs");
-    assert(stat);
-    stat = shadow_shader->link();
-    assert(stat);
+    shadow_shader->setStage(ShaderStageVS, "content/shaders/shadow.vs");
+    shadow_shader->setStage(ShaderStageFS, "content/shaders/shadow.fs");
+    shadow_shader->finish();
+    assert(!shadow_shader->error());
+
+    shadow_shader->setUniformBufferBinding("SceneUniforms", 0);
+    shadow_shader->setUniformBufferBinding("MeshUniforms", 1);
+    shadow_shader->setTextureBinding("diffuseTexture", 0);
+    shadow_shader->setTextureBinding("depthTexture", 1);
 
     flat_shader = std::make_shared<Shader>();
-    stat = false;
-    stat = flat_shader->setVS("content/shaders/flat.vs");
-    assert(stat);
-    stat = flat_shader->setFS("content/shaders/flat.fs");
-    assert(stat);
-    stat = flat_shader->link();
-    assert(stat);
+    flat_shader->setStage(ShaderStageVS, "content/shaders/flat.vs");
+    flat_shader->setStage(ShaderStageFS, "content/shaders/flat.fs");
+    flat_shader->finish();
+    assert(!flat_shader->error());
+
+    flat_shader->setUniformBufferBinding("SceneUniforms", 0);
+    flat_shader->setUniformBufferBinding("MeshUniforms", 1);
+    flat_shader->setTextureBinding("diffuseTexture", 0);
+    flat_shader->setTextureBinding("depthTexture", 1);
 
     camera = std::make_shared<FPSCamera>(glm::vec3(), 0, 0);
     camera->setAspectRatio((float)width / (float)height);
 
     system = std::make_shared<System>();
 
-    // TODO setLightDirection()
-    glm::mat4 shadowView = glm::lookAt(lightDir, glm::vec3(), glm::vec3(0, 1, 0));
-    glm::mat4 shadowProj = glm::ortho(
-        -shadowBounds, shadowBounds, -shadowBounds, shadowBounds, shadowNear, shadowFar);
-    lightViewProjection = shadowProj * shadowView;
+    // TODO: Reuse the depth buffer instead of a texture
+    // TODO: Renderbuffer may be faster for some things
+    // TODO format, filter
+    shadowTex = std::make_shared<Texture>(
+        SurfaceFormatR16F, shadowSize, shadowSize, 1, TextureFilterModeBilinear, 0.0f,
+        TextureAddressModeClamp, TextureAddressModeClamp);
 
-    shadowTarget = std::make_shared<RenderTarget>(shadowSize, shadowSize, 0);
-    shadowTarget->addColorTarget(GL_R32F, GL_LINEAR); // TODO format, filter
-    shadowTarget->addDepthStencilTarget(GL_DEPTH_COMPONENT24);
+    std::shared_ptr<RenderBuffer> shadowDepthBuffer = std::make_shared<RenderBuffer>(
+        SurfaceFormatDepth24, shadowSize, shadowSize);
+
+    shadowTarget = std::make_shared<RenderTarget>();
+    shadowTarget->addColorTarget(shadowTex);
+    shadowTarget->addDepthStencilTarget(shadowDepthBuffer);
     shadowTarget->finish();
 
-    debug_mesh = std::make_shared<Mesh>();
+    debug_mesh = std::make_shared<Mesh>(BufferUsageStream);
 
-    font = std::make_shared<Font>("content/fonts/consolas_bold.ttf", 0, 12);
+    // TODO
+    //font = std::make_shared<Font>("content/fonts/consolas_bold.ttf", 0, 12);
 
-    const int TEX_SIZE = 1024;
-    const int TEX_CELL = 128;
-
-    std::shared_ptr<TextureData> texData = TextureUtil::loadJPEG("content/textures/checker.jpg");
-    texture = TextureUtil::createTextureFromTextureData(texData, GL_RGB, 6);
-    //texture = std::make_shared<Texture>(16, 16, GL_RGBA, GL_UNSIGNED_BYTE, 1);
+    texture = Texture::fromJpeg("content/textures/checker.jpg", 6, TextureFilterModeBilinear,
+         0.0f, TextureAddressModeWrap, TextureAddressModeWrap);
 
     memset(keys, 0, sizeof(keys));
+
+    uniformBuffer = std::make_shared<Buffer>(BufferBindingUniformBuffer, BufferUsageStream);
+
+    glm::vec3 lightDir = glm::normalize(glm::vec3(0.8f, 1.0f, 0.6f));
+    glm::mat4 shadowView = glm::lookAt(lightDir, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+    glm::mat4 shadowProj = glm::ortho(
+        -shadowBounds, shadowBounds, -shadowBounds, shadowBounds, shadowNear, shadowFar);
+    sceneUniforms.lightViewProjection = shadowProj * shadowView;
+
+    sceneUniforms.lightDirection = lightDir;
+    sceneUniforms.depthTextureSize = shadowSize;
+
+    CHECK_GL_ERROR();
 }
 
 void Demo::updateDebugBuff() {
@@ -293,7 +340,21 @@ void Demo::updateDebugBuff() {
 }
 
 void Demo::draw() {
-    glm::mat4 camViewProjection = camera->getViewProjection();
+    for (auto & pair : meshes) {
+        MeshUniforms *uniforms = pair.mesh->getUniforms();
+
+        glm::mat4 world = pair.body->getLocalToWorld();
+        uniforms->world = world;
+        uniforms->worldInverseTranspose = glm::inverse(glm::transpose(world));
+
+        pair.mesh->flushUniforms();
+    }
+
+    sceneUniforms.viewProjection = camera->getViewProjection();
+    uniformBuffer->setData(sizeof(SceneUniforms), &sceneUniforms);
+    uniformBuffer->bind(0);
+
+    shadow_shader->bind();
 
     shadowTarget->bind();
 
@@ -303,118 +364,54 @@ void Demo::draw() {
     glClearDepth(1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    shadow_shader->bind();
-
-    // TODO cache maybe
-    GLint worldInverseTransposeLocation = glGetUniformLocation(
-        shadow_shader->getProgram(), "worldInverseTranspose");
-    GLint worldViewProjectionLocation = glGetUniformLocation(
-        shadow_shader->getProgram(), "worldViewProjection"); // TODO unused
-    GLint lightWorldViewProjectionLocation = glGetUniformLocation(
-        shadow_shader->getProgram(), "lightWorldViewProjection");
-
-    for (auto & pair : meshes) {
-        // TODO redundant
-        glm::mat4 world = pair.body->getLocalToWorld();
-        glm::mat4 worldInverseTranspose = glm::inverse(glm::transpose(world));
-        glm::mat4 worldViewProjection = camViewProjection * world;
-        glm::mat4 lightWorldViewProjection = lightViewProjection * world;
-
-        glUniformMatrix4fv(worldViewProjectionLocation, 1, false,
-            glm::value_ptr(worldViewProjection));
-        glUniformMatrix4fv(lightWorldViewProjectionLocation, 1, false,
-            glm::value_ptr(lightWorldViewProjection));
-        glUniformMatrix4fv(worldInverseTransposeLocation, 1, false,
-            glm::value_ptr(worldInverseTranspose));
-
-        pair.mesh->draw();
-    }
+    for (auto & pair : meshes)
+        pair.mesh->draw(1);
 
     shadow_shader->unbind();
-
     shadowTarget->unbind();
-
-    phong_shader->bind();
-
-    worldInverseTransposeLocation = glGetUniformLocation(
-        phong_shader->getProgram(), "worldInverseTranspose");
-    worldViewProjectionLocation = glGetUniformLocation(
-        phong_shader->getProgram(), "worldViewProjection");
-    lightWorldViewProjectionLocation = glGetUniformLocation(
-        phong_shader->getProgram(), "lightWorldViewProjection");
-    GLint depthTextureLocation = glGetUniformLocation(
-        phong_shader->getProgram(), "depthTexture");
-    GLint diffuseTextureLocation = glGetUniformLocation(
-        phong_shader->getProgram(), "diffuseTexture");
-    GLint lightDirectionLocation = glGetUniformLocation(
-        phong_shader->getProgram(), "lightDirection");
-    GLint depthTextureSizeLocation = glGetUniformLocation(
-        phong_shader->getProgram(), "depthTextureSize");
 
     glViewport(0, 0, width, height);
 
-    glClearColor(0.2f, 0.4f, 0.8f, 1.0f);
+    glClearColor(0.0289f, 0.133f, 0.612f, 1.0f);
     glClearDepth(1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     phong_shader->bind();
 
     texture->bind(0);
-    shadowTarget->bindColorTexture(1, 0);
+    shadowTex->bind(1);
 
     if (wireframe)
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-    for (auto & pair : meshes) {
-        // TODO redundant
-        glm::mat4 world = pair.body->getLocalToWorld();
-
-        glm::mat4 worldInverseTranspose = glm::inverse(glm::transpose(world));
-        glm::mat4 worldViewProjection = camViewProjection * world;
-        glm::mat4 lightWorldViewProjection = lightViewProjection * world;
-
-        glUniformMatrix4fv(worldViewProjectionLocation, 1, false,
-            glm::value_ptr(worldViewProjection));
-        glUniformMatrix4fv(lightWorldViewProjectionLocation, 1, false,
-            glm::value_ptr(lightWorldViewProjection));
-        glUniformMatrix4fv(worldInverseTransposeLocation, 1, false,
-            glm::value_ptr(worldInverseTranspose));
-        glUniform1i(depthTextureLocation, 1);
-        glUniform1i(diffuseTextureLocation, 0);
-        glUniform1i(depthTextureSizeLocation, shadowSize);
-        glUniform3fv(lightDirectionLocation, 1,
-            glm::value_ptr(lightDir));
-
-        pair.mesh->draw();
-    }
+    for (auto & pair : meshes)
+        pair.mesh->draw(1);
 
     if (wireframe)
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     texture->unbind(0);
-    shadowTarget->unbindColorTexture(1);
+    shadowTex->unbind(1);
 
     phong_shader->unbind();
 
-    prepDebug();
+    //prepDebug();
 
-    flat_shader->bind();
-    glDisable(GL_DEPTH_TEST);
+    //flat_shader->bind();
+    //glDisable(GL_DEPTH_TEST);
 
-    GLuint viewProjectionLocation = glGetUniformLocation(
-        flat_shader->getProgram(), "viewProjection");
-    glUniformMatrix4fv(viewProjectionLocation, 1, false,
-            glm::value_ptr(camViewProjection));
+    // TODO: Uniforms
+    //debug_mesh->draw(1);
 
-    debug_mesh->draw();
+    //glEnable(GL_DEPTH_TEST);
+    //flat_shader->unbind();
 
-    glEnable(GL_DEPTH_TEST);
-    flat_shader->unbind();
+    //updateDebugBuff();
 
-    updateDebugBuff();
+    //font->drawString(debug_buff, 10, 10);
+    //font->flush(width, height);
 
-    font->drawString(debug_buff, 10, 10);
-    font->flush(width, height);
+    uniformBuffer->unbind(0);
 
     //shadowTarget->blit(0, 0, 300, 300, 0);
 }
@@ -445,6 +442,9 @@ void Demo::run() {
 
     time = getTime();
 
+    #define GRAPHICS_FRAMES 200
+    static double graphicsTime[GRAPHICS_FRAMES];
+
     while (!glfwWindowShouldClose(window) && !close) {
         double newTime = getTime();
         double elapsed = newTime - time;
@@ -452,19 +452,41 @@ void Demo::run() {
 
         glfwPollEvents();
 
-        system->integrate(newTime, elapsed);
-        physicsTime += getTime() - newTime;
+        //system->integrate(newTime, elapsed);
+
+        double elapsedPhysics = getTime() - newTime;
+        physicsTime += elapsedPhysics;
 
         updateCamera(elapsed);
 
+        double graphicsStart = getTime();
         draw();
 
         glFinish();
-
         glfwSwapBuffers(window);
+
+        double elapsedGraphics = getTime() - graphicsStart;
+
+        graphicsTime[nFrames % GRAPHICS_FRAMES] = elapsedGraphics;
+
+        if (nFrames % GRAPHICS_FRAMES == 0) {
+            double avgGraphics = 0.0;
+
+            for (int i = 0; i < GRAPHICS_FRAMES; i++)
+                avgGraphics += graphicsTime[i];
+
+            avgGraphics /= GRAPHICS_FRAMES;
+
+            printf("Graphics: %f\n", avgGraphics * 1000.0);
+        }
 
         frameTime += getTime() - newTime;
         nFrames++;
+
+        /*printf("physics:  %fms\n"
+               "graphics: %fms\n",
+               elapsedPhysics * 1000.0,
+               elapsedGraphics * 1000.0);*/
     }
 
     destroy_demo();
@@ -476,64 +498,57 @@ Demo::~Demo() {
     glfwTerminate();
 }
 
-glm::vec3 transform(glm::mat4 mat, glm::vec3 vec) {
-    // TODO
-    glm::vec4 v4 = glm::vec4(vec.x, vec.y, vec.z, 1.0f);
-    v4 = mat * v4;
-    return glm::vec3(v4.x, v4.y, v4.z);
-}
-
 void Demo::prepDebug() {
     std::vector<MeshVertex> vertices;
-    std::vector<int> indices;
+    std::vector<unsigned int> indices;
     MeshVertex vert;
 
     for (auto & pair : meshes) {
         const float diff = 0.5f;
-        int i0 = vertices.size();
+        unsigned int i0 = vertices.size();
 
         glm::mat4 world = pair.body->getLocalToWorld();
 
         vert.color = glm::vec4(1, 1, 0, 1);
-        vert.position = transform(world, glm::vec3(-diff, 0, 0));
+        vert.position = glm::vec3(world * glm::vec4(-diff, 0, 0, 1));
         vertices.push_back(vert);
         vert.color = glm::vec4(1, 1, 0, 1);
-        vert.position = transform(world, glm::vec3(0, 0, 0));
-        vertices.push_back(vert);
-
-        vert.color = glm::vec4(1, 1, 0, 1);
-        vert.position = transform(world, glm::vec3(0, -diff, 0));
-        vertices.push_back(vert);
-        vert.color = glm::vec4(1, 1, 0, 1);
-        vert.position = transform(world, glm::vec3(0, 0, 0));
+        vert.position = glm::vec3(world * glm::vec4(0, 0, 0, 1));
         vertices.push_back(vert);
 
         vert.color = glm::vec4(1, 1, 0, 1);
-        vert.position = transform(world, glm::vec3(0, 0, -diff));
+        vert.position = glm::vec3(world * glm::vec4(0, -diff, 0, 1));
         vertices.push_back(vert);
         vert.color = glm::vec4(1, 1, 0, 1);
-        vert.position = transform(world, glm::vec3(0, 0, 0));
+        vert.position = glm::vec3(world * glm::vec4(0, 0, 0, 1));
+        vertices.push_back(vert);
+
+        vert.color = glm::vec4(1, 1, 0, 1);
+        vert.position = glm::vec3(world * glm::vec4(0, 0, -diff, 1));
+        vertices.push_back(vert);
+        vert.color = glm::vec4(1, 1, 0, 1);
+        vert.position = glm::vec3(world * glm::vec4(0, 0, 0, 1));
         vertices.push_back(vert);
 
         vert.color = glm::vec4(1, 0, 0, 1);
-        vert.position = transform(world, glm::vec3(diff, 0, 0));
+        vert.position = glm::vec3(world * glm::vec4(diff, 0, 0, 1));
         vertices.push_back(vert);
         vert.color = glm::vec4(1, 0, 0, 1);
-        vert.position = transform(world, glm::vec3(0, 0, 0));
+        vert.position = glm::vec3(world * glm::vec4(0, 0, 0, 1));
         vertices.push_back(vert);
 
         vert.color = glm::vec4(0, 1, 0, 1);
-        vert.position = transform(world, glm::vec3(0, diff, 0));
+        vert.position = glm::vec3(world * glm::vec4(0, diff, 0, 1));
         vertices.push_back(vert);
         vert.color = glm::vec4(0, 1, 0, 1);
-        vert.position = transform(world, glm::vec3(0, 0, 0));
+        vert.position = glm::vec3(world * glm::vec4(0, 0, 0, 1));
         vertices.push_back(vert);
 
         vert.color = glm::vec4(0, 0, 1, 1);
-        vert.position = transform(world, glm::vec3(0, 0, diff));
+        vert.position = glm::vec3(world * glm::vec4(0, 0, diff, 1));
         vertices.push_back(vert);
         vert.color = glm::vec4(0, 0, 1, 1);
-        vert.position = transform(world, glm::vec3(0, 0, 0));
+        vert.position = glm::vec3(world * glm::vec4(0, 0, 0, 1));
         vertices.push_back(vert);
 
         indices.push_back(i0 + 0);
@@ -618,7 +633,7 @@ void Demo::prepDebug() {
 
     for (auto & contact : contacts) {
         const float diff = 0.25f;
-        int i0 = vertices.size();
+        unsigned int i0 = vertices.size();
 
         glm::vec3 p = contact.contact.position;
 
@@ -657,7 +672,7 @@ void Demo::prepDebug() {
 
     debug_mesh->setVertices(&vertices[0], vertices.size());
     debug_mesh->setIndices(&indices[0], indices.size());
-    debug_mesh->setMode(GL_LINES); // TODO redundant
+    debug_mesh->setRenderMode(MeshRenderModeLines); // TODO redundant
 }
 
 }}

@@ -3,11 +3,15 @@ project(physics)
 
 include_directories(include/)
 
-set(CMAKE_CXX_FLAGS "-std=c++11 -fno-exceptions -O3")
+set(CMAKE_CXX_FLAGS "-std=c++11 -fno-exceptions -fno-rtti -O3 -g -DDEBUG")
 set(CMAKE_CXX_FLAGS "-I/usr/include -I/usr/local/include/ -I/opt/local/include/ -I/opt/local/include/freetype2/ ${CMAKE_CXX_FLAGS}")
 
-add_library(physics
+set(CMAKE_INSTALL_RPATH "\$ORIGIN/")
+set(CMAKE_INSTALL_NAME_DIR "@executable_path/")
+
+add_library(physics SHARED
     src/physics/collision/collision.cpp
+    src/physics/collision/cubeshape.cpp
     src/physics/collision/planeshape.cpp
     src/physics/collision/shape.cpp
     src/physics/collision/sphereshape.cpp
@@ -19,31 +23,30 @@ add_library(physics
     src/physics/transform.cpp
 )
 
-add_library(util
+add_library(util SHARED
+    src/util/geometrybuilder.cpp
+    src/util/mesh.cpp
+    src/util/camera.cpp
+    src/util/buffer.cpp
+    src/util/texture.cpp
+    src/util/rendertarget.cpp
+    src/util/shader.cpp
     src/util/demo.cpp
-    src/graphics/camera.cpp
-    src/graphics/cubemesh.cpp
-    src/graphics/font.cpp
-    src/graphics/fpscamera.cpp
-    src/graphics/mesh.cpp
-    src/graphics/path.cpp
-    src/graphics/planemesh.cpp
-    src/graphics/rendertarget.cpp
-    src/graphics/shader.cpp
-    src/graphics/spheremesh.cpp
-    src/graphics/texture.cpp
-    src/graphics/textureutil.cpp
 )
 
 target_link_libraries(util
-    -framework\ OpenGL
-    -lglew
-    -lglfw
+    -L/usr/lib/
+    -L/usr/local/lib/
     -L/opt/local/lib/
-    -lfreetype
-    -lpng
+    -lglfw
+    -lglew
+    -framework\ OpenGL
     -ljpeg
-)
+    physics
+    )
+
+install(TARGETS physics DESTINATION bin/)
+install(TARGETS util DESTINATION bin/)
 
 add_executable(demo1 src/demos/demo1.cpp)
 target_link_libraries(demo1 physics util)

@@ -71,12 +71,6 @@ bool checkCollisionSpherePlane(const Shape & s1, const Shape & s2,
     return false;
 }
 
-bool checkCollisionSphereCube(const Shape & s1, const Shape & s2,
-    const Transform & t1, const Transform & t2, Contact & contact)
-{
-    return false;
-}
-
 bool checkCollisionPlaneSphere(const Shape & s1, const Shape & s2,
     const Transform & t1, const Transform & t2, Contact & contact)
 {
@@ -88,13 +82,13 @@ bool checkCollisionPlaneSphere(const Shape & s1, const Shape & s2,
     return false;
 }
 
-bool checkCollisionPlanePlane(const Shape & s1, const Shape & s2,
+bool checkCollisionSphereCube(const Shape & s1, const Shape & s2,
     const Transform & t1, const Transform & t2, Contact & contact)
 {
     return false;
 }
 
-bool checkCollisionPlaneCube(const Shape & s1, const Shape & s2,
+bool checkCollisionPlanePlane(const Shape & s1, const Shape & s2,
     const Transform & t1, const Transform & t2, Contact & contact)
 {
     return false;
@@ -109,6 +103,64 @@ bool checkCollisionCubeSphere(const Shape & s1, const Shape & s2,
 bool checkCollisionCubePlane(const Shape & s1, const Shape & s2,
     const Transform & t1, const Transform & t2, Contact & contact)
 {
+    const CubeShape & cube = static_cast<const CubeShape &>(s1);
+    const PlaneShape & plane = static_cast<const PlaneShape &>(s2);
+
+    float planeDist = plane.getDistance();
+    glm::vec3 norm = plane.getNormal();
+
+    glm::vec3 delta = glm::vec3(cube.getWidth(), cube.getHeight(), cube.getDepth()) / 2.0f;
+
+    // TODO make this better
+    glm::vec3 points[8];
+    points[0] = glm::vec3(-delta.x, -delta.y, -delta.z);
+    points[1] = glm::vec3( delta.x, -delta.y, -delta.z);
+    points[2] = glm::vec3(-delta.x,  delta.y, -delta.z);
+    points[3] = glm::vec3( delta.x,  delta.y, -delta.z);
+    points[4] = glm::vec3(-delta.x, -delta.y,  delta.z);
+    points[5] = glm::vec3( delta.x, -delta.y,  delta.z);
+    points[6] = glm::vec3(-delta.x,  delta.y,  delta.z);
+    points[7] = glm::vec3( delta.x,  delta.y,  delta.z);
+
+    // Transform points to world space
+    for (int i = 0; i < 8; i++)
+        t1.transform(points[i]);
+
+    float maxDepth = 0.0f;
+    glm::vec3 maxPoint;
+    bool found = false;
+
+    // Check each point. TODO: check if the max depth is the best. Might be able
+    // to merge with above loop to avoid some math.
+    for (int i = 0; i < 8; i++) {
+        float depth = -(glm::dot(points[i], norm) - planeDist); // TODO could move negative
+
+        if (depth > 0.0f && depth > maxDepth) {
+            maxDepth = depth;
+            maxPoint = points[i];
+            found = true;
+        }
+    }
+
+    if (found) {
+        contact.position = maxPoint;
+        contact.depth = maxDepth;
+        contact.normal = -norm;
+
+        return true;
+    }
+
+    return false;
+}
+
+bool checkCollisionPlaneCube(const Shape & s1, const Shape & s2,
+    const Transform & t1, const Transform & t2, Contact & contact)
+{
+    if (checkCollisionCubePlane(s2, s1, t2, t1, contact)) {
+        contact.normal = -contact.normal;
+        return true;
+    }
+
     return false;
 }
 
