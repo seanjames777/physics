@@ -12,7 +12,7 @@
 #include <memory>
 #include <vector>
 #include <string>
-#include <util/gldefs.h>
+#include <util/defs.h>
 
 struct GLFWwindow;
 
@@ -37,7 +37,7 @@ namespace Util {
 /**
  * @brief Demo application base class
  */
-class Demo {
+class UTIL_EXPORT Demo {
 private:
 
     struct MeshBodyPair {

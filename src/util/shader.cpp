@@ -41,7 +41,7 @@ void Shader::setStage(ShaderStage stage, const std::string & path) {
 
     *shader = glCreateShader((GLenum)stage);
 
-    std::ifstream file(path);
+    std::ifstream file(path, std::ios::in | std::ios::binary);
 
     if (!file) {
         std::cout << "Error opening '" << path << "'" << std::endl;
@@ -52,14 +52,25 @@ void Shader::setStage(ShaderStage stage, const std::string & path) {
     }
 
     file.seekg(0, std::ios::end);
-    int size = file.tellg();
+    int size = (int)file.tellg(); // int because glShaderSource wants an int
     file.seekg(0, std::ios::beg);
 
     char *src = new char[size];
     file.read(src, size);
+
+	if (!file) {
+		std::cout << "Error reading from '" << path << "' (" << file.gcount() << ") characters read" << std::endl;
+		delete[] src;
+		file.close();
+		glDeleteShader(*shader);
+		*shader = 0;
+		_error = true;
+		return;
+	}
+
     file.close();
 
-    glShaderSource(*shader, 1, &src, &size);
+	glShaderSource(*shader, 1, (const char **)&src, &size);
     delete [] src;
 
     glCompileShader(*shader);

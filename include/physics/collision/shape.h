@@ -9,6 +9,8 @@
 #ifndef __SHAPE_H
 #define __SHAPE_H
 
+#include <physics/defs.h>
+
 namespace Physics {
 
 /**
@@ -21,7 +23,7 @@ namespace Physics {
  * requiring RTTI. Care has been taken to avoid virtual functions for performance
  * reasons.
  */
-class Shape {
+class PHYSICS_EXPORT Shape {
 public:
 
     /**

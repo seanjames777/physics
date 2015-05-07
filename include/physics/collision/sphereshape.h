@@ -13,7 +13,7 @@
 
 namespace Physics {
 
-class SphereShape : public Shape {
+class PHYSICS_EXPORT SphereShape : public Shape {
 private:
 
     float r;

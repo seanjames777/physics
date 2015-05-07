@@ -55,8 +55,8 @@ glm::vec3 Body::getVelocityAtPoint(glm::vec3 relPos) {
 }
 
 float Body::getMass() {
-    if (fixed)
-        return 1.0f / 0.0f; // Infinity // TODO
+	if (fixed)
+		return std::numeric_limits<float>::infinity();
 
     return mass;
 }
@@ -69,8 +69,8 @@ float Body::getInverseMass() {
 }
 
 glm::mat3 Body::getInertiaTensor() {
-    if (fixed)
-        return glm::mat3(1.0f / 0.0f);
+	if (fixed)
+		return glm::mat3(std::numeric_limits<float>::infinity());
 
     return inertiaTensor;
 }

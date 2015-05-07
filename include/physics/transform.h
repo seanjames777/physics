@@ -9,14 +9,11 @@
 #ifndef __TRANSFORM_H
 #define __TRANSFORM_H
 
-#define GLM_FORCE_RADIANS
-#include <glm/glm.hpp>
-#include <glm/gtc/quaternion.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include <physics/defs.h>
 
 namespace Physics {
 
-struct Transform {
+struct PHYSICS_EXPORT Transform {
     glm::vec3 position;    //!< Position vector
     glm::quat orientation; //!< Orientation quaternion
 

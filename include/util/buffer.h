@@ -1,7 +1,7 @@
 #ifndef __BUFFER_H
 #define __BUFFER_H
 
-#include <util/gldefs.h>
+#include <util/defs.h>
 
 enum BufferBinding {
     BufferBindingVertexBuffer  = GL_ARRAY_BUFFER,
@@ -15,7 +15,7 @@ enum BufferUsage {
     BufferUsageStream  = GL_STREAM_DRAW
 };
 
-class Buffer {
+class UTIL_EXPORT Buffer{
 private:
 
     GLuint        buffer;

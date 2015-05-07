@@ -14,7 +14,7 @@
 
 namespace Physics {
 
-class PlaneShape : public Shape {
+class PHYSICS_EXPORT PlaneShape : public Shape {
 private:
 
     glm::vec3 normal;

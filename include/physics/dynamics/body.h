@@ -16,7 +16,7 @@ namespace Physics {
 
 class Shape;
 
-class Body {
+class PHYSICS_EXPORT Body {
 private:
 
     // Linear quantities are stored as a position vector and a velocity

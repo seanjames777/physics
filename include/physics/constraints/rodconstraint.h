@@ -14,7 +14,7 @@
 
 namespace Physics {
 
-class RodConstraint : public Constraint {
+class PHYSICS_EXPORT RodConstraint : public Constraint {
 private:
 
     std::shared_ptr<Body> b1;

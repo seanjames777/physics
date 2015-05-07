@@ -25,7 +25,7 @@ class Constraint;
  * @brief Physics system, which tracks bodies that may interact, and integrates
  * their motion and forces.
  */
-class System {
+class PHYSICS_EXPORT System {
 public:
 
     // TODO ugly

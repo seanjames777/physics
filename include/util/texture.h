@@ -1,7 +1,7 @@
 #ifndef __TEXTURE_H
 #define __TEXTURE_H
 
-#include <util/gldefs.h>
+#include <util/defs.h>
 #include <memory>
 #include <string>
 
@@ -30,7 +30,7 @@ enum SurfaceFormat {
     SurfaceFormatDepth24    = GL_DEPTH_COMPONENT24
 };
 
-class Surface {
+class UTIL_EXPORT Surface {
 public:
 
     Surface();
@@ -45,7 +45,7 @@ public:
 
 };
 
-class Texture : public Surface {
+class UTIL_EXPORT Texture : public Surface {
 private:
 
     GLuint        texture;
@@ -90,7 +90,7 @@ public:
 
 };
 
-class RenderBuffer : public Surface {
+class UTIL_EXPORT RenderBuffer : public Surface {
 private:
 
     GLuint        renderBuffer;

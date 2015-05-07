@@ -1,7 +1,7 @@
 #ifndef __MESH_H
 #define __MESH_H
 
-#include <util/gldefs.h>
+#include <util/defs.h>
 #include <util/buffer.h>
 #include <memory>
 
@@ -26,7 +26,7 @@ enum MeshRenderMode {
     MeshRenderModeLines     = GL_LINES
 };
 
-class Mesh {
+class UTIL_EXPORT Mesh {
 private:
 
     std::shared_ptr<Buffer> vertexBuffer;

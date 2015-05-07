@@ -6,7 +6,7 @@
 
 #define MAX_COLOR_TARGETS 4
 
-class RenderTarget {
+class UTIL_EXPORT RenderTarget {
 private:
 
     GLuint                   framebuffer;

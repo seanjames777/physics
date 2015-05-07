@@ -17,23 +17,36 @@
 #include <physics/collision/shape.h>
 #include <physics/dynamics/body.h>
 #include <physics/system.h>
-#include <sys/time.h>
 #include <util/demo.h>
+
+#ifndef WIN32
+#include <sys/time.h>
 #include <unistd.h>
+#else
+#include <Windows.h>
+#endif
 
 using namespace std::placeholders;
 
 namespace Physics { namespace Util {
 
 double Demo::getTime() {
-    struct timeval tv;
-    gettimeofday(&tv, nullptr);
+#ifdef WIN32
+	LARGE_INTEGER time, frequency;
+	QueryPerformanceCounter(&time);
+	QueryPerformanceFrequency(&frequency);
 
-    double time =
-        (double)tv.tv_sec +
-        (double)tv.tv_usec * (1.0 / 1000000.0);
+	return (double)time.QuadPart / (double)frequency.QuadPart;
+#else
+	struct timeval now;
+	gettimeofday(&now, nullptr);
+	double time = 0.0;
 
-    return time;
+	time += now.tv_sec;
+	time += now.tv_usec / 1000000.0;
+
+	return time;
+#endif
 }
 
 void Demo::resizeHandler(GLFWwindow *window, int width, int height) {
@@ -159,6 +172,7 @@ Demo::Demo(char *executable, std::string title, int width, int height, int shado
       pausePhysics(false),
       wireframe(false)
 {
+#ifndef WIN32
     #define BUFFSZ 512
     char buffer[BUFFSZ];
     getcwd(buffer, BUFFSZ);
@@ -175,6 +189,7 @@ Demo::Demo(char *executable, std::string title, int width, int height, int shado
     std::cout << buffer << std::endl;
 
     chdir(buffer);
+#endif
 
     glfwInit();
 

@@ -1,9 +1,9 @@
 #ifndef __CAMERA_H
 #define __CAMERA_H
 
-#include <util/gldefs.h>
+#include <util/defs.h>
 
-class FPSCamera {
+class UTIL_EXPORT FPSCamera {
 private:
 
     glm::vec3 position;

@@ -1,7 +1,7 @@
 #ifndef __SHADER_H
 #define __SHADER_H
 
-#include <util/gldefs.h>
+#include <util/defs.h>
 #include <string>
 
 enum ShaderStage {
@@ -12,7 +12,7 @@ enum ShaderStage {
     ShaderStageFS  = GL_FRAGMENT_SHADER
 };
 
-class Shader {
+class UTIL_EXPORT Shader {
 private:
 
     GLuint program;

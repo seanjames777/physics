@@ -174,6 +174,7 @@ bool checkCollisionUndefined(const Shape & s1, const Shape & s2,
     const Transform & t1, const Transform & t2, Contact & contact)
 {
     assert(false && "Dispatch table missing an entry");
+	return false;
 }
 
 void initialize() {

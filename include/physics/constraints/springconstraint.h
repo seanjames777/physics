@@ -14,7 +14,7 @@
 
 namespace Physics {
 
-class SpringConstraint : public Constraint {
+class PHYSICS_EXPORT SpringConstraint : public Constraint {
 private:
 
     std::shared_ptr<Body> b1;

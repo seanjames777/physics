@@ -3,7 +3,7 @@
 
 #include <util/mesh.h>
 
-class GeometryBuilder {
+class UTIL_EXPORT GeometryBuilder {
 public:
 
     static std::shared_ptr<Mesh> createPlane(

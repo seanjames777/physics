@@ -39,7 +39,7 @@ struct Contact {
 /**
  * @brief Initialize collision system. This can safely be called more than once.
  */
-void initialize(); // TODO static?
+void PHYSICS_EXPORT initialize(); // TODO static?
 
 /**
  * @brief Check for collision with another shape. This function calls the
@@ -53,7 +53,7 @@ void initialize(); // TODO static?
  *
  * @return True if there was a collision, or false otherwise
  */
-bool checkCollision(const Shape & s1, const Shape & s2, const Transform & t1,
+bool PHYSICS_EXPORT checkCollision(const Shape & s1, const Shape & s2, const Transform & t1,
     const Transform & t2, Contact & contact);
 
 }}

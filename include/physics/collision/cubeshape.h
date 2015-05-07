@@ -13,7 +13,7 @@
 
 namespace Physics {
 
-class CubeShape : public Shape {
+class PHYSICS_EXPORT CubeShape : public Shape {
 private:
 
     float width;

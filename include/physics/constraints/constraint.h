@@ -10,9 +10,11 @@
 #ifndef __CONSTRAINT_H
 #define __CONSTRAINT_H
 
+#include <physics/defs.h>
+
 namespace Physics {
 
-class Constraint {
+class PHYSICS_EXPORT Constraint {
 public:
 
     Constraint();
