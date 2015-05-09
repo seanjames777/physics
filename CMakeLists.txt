@@ -11,6 +11,8 @@ endif()
 set(CMAKE_INSTALL_RPATH "\$ORIGIN/")
 set(CMAKE_INSTALL_NAME_DIR "@executable_path/")
 
+include(prebuilt/CMakeLists.txt)
+
 add_library(physics SHARED
     src/physics/collision/collision.cpp
     src/physics/collision/cubeshape.cpp
@@ -60,34 +62,6 @@ add_library(util SHARED
     include/util/defs.h
 )
 
-add_library(glfw SHARED IMPORTED)
-add_library(glew SHARED IMPORTED)
-add_library(jpeg SHARED IMPORTED)
-
-if ("${CMAKE_SYSTEM}" MATCHES "Windows")
-    include_directories(prebuilt_windows/include/)
-
-    set_target_properties(glew PROPERTIES IMPORTED_IMPLIB_DEBUG ${CMAKE_SOURCE_DIR}/prebuilt_windows/lib/x64_debug/glew32.lib)
-    set_target_properties(glew PROPERTIES IMPORTED_IMPLIB_RELEASE ${CMAKE_SOURCE_DIR}/prebuilt_windows/lib/x64_release/glew32.lib)
-
-    set_target_properties(glfw PROPERTIES IMPORTED_IMPLIB_DEBUG ${CMAKE_SOURCE_DIR}/prebuilt_windows/lib/x64_debug/glfw3dll.lib)
-    set_target_properties(glfw PROPERTIES IMPORTED_IMPLIB_RELEASE ${CMAKE_SOURCE_DIR}/prebuilt_windows/lib/x64_release/glfw3dll.lib)
-
-    set_target_properties(jpeg PROPERTIES IMPORTED_IMPLIB_DEBUG ${CMAKE_SOURCE_DIR}/prebuilt_windows/lib/x64_debug/jpeg.lib)
-    set_target_properties(jpeg PROPERTIES IMPORTED_IMPLIB_RELEASE ${CMAKE_SOURCE_DIR}/prebuilt_windows/lib/x64_release/jpeg.lib)
-else()
-    target_link_libraries(util
-        -L/usr/lib/
-        -L/usr/local/lib/
-        -L/opt/local/lib/
-        -lglfw
-        -lglew
-        -framework\ OpenGL
-        -ljpeg
-        physics
-    )
-endif()
-
 FIND_PACKAGE(OpenGL REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIRS})
 
@@ -121,16 +95,3 @@ install(FILES content/shaders/font.fs DESTINATION bin/content/shaders/)
 install(FILES content/fonts/consolas_bold.ttf DESTINATION bin/content/fonts/)
 install(FILES content/textures/checker.jpg DESTINATION bin/content/textures/)
 
-if (CMAKE_BUILD_TYPE MATCHES "debug")
-    set(LIB_DIR "debug")
-else (CMAKE_BUILD_TYPE MATCHES "debug")
-    set(LIB_DIR "release")
-endif ()
-
-# Install Windows shared libraries
-if ("${CMAKE_SYSTEM}" MATCHES "Windows")
-    install(
-        CODE "file(GLOB    _LIBS_ \"${CMAKE_SOURCE_DIR}/prebuilt_windows/lib/x64_${LIB_DIR}/*.dll\")"
-        CODE "file(INSTALL \${_LIBS_} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin/)"
-    )
-endif()

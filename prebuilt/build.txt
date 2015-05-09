@@ -1,0 +1,72 @@
+WINDOWS:
+
+	libjpeg:
+
+		- Download latest from http://www.ijg.org/files/
+		- Developer command prompt C:\Program Files (x86)\Microsoft Visual Studio 12.0\Common7\Tools\Shortcuts
+		- CD to directory
+		- nmake -f makefile.vc setup-v10
+		- Open jpeg.sln in Visual Studio. Upgrade.
+		- It is not possible to build a DLL apparently
+		- Build > Configuration Manager > Create an x64 platform
+		- Build solution. x64/Release contains library
+		- Make a debug version if you like.
+		- Copy jconfig.h, jmorecfg.h, jpeglib.h to headers
+
+	zlib:
+
+		- Download latest from http://www.zlib.net/
+		- Configure with CMake. Set install prefix first. Open solution.
+		- Build debug/release. Builds both DLL and LIB.
+		- Copy zlib.lib, zlibd.lib, zlib.dll, zlibd.dll, zconf.h, zlib.h
+
+	libpng:
+
+		- Download latest from http://www.libpng.org/pub/png/libpng.html
+		- Use CMake. Set install prefix. Set ZLIB_ROOT to zlib install directory from previous step
+		- Copy zlib zconf.h to zlib source root directory
+		- Buld debug/release. Builds both DLL and LIB.
+		- Copy libpng16.dll, libpng16d.dll, libpng16.lib, libpng16d.lib, include/
+
+	freetype2:
+
+		- Download latest from http://download.savannah.gnu.org/releases/freetype/
+		- Extract with, e.g. 7-zip.
+		- Configure with CMake. Set install prefix. Set BUILD_SHARED_LIBS.
+		- Build debug, copy DLL/LIB, build release, copy DLL/LIB, copy include/freetype2/
+
+	glew:
+
+		- Download latest from http://sourceforge.net/projects/glew/
+		- Open build/vc12/glew.sln
+		- Build Debug and Release
+		- Copy glew32d.dll, glew32.dll, glew32d.lib, glew32.lib, include/GL/
+
+	glfw:
+
+		- Download latest from http://www.glfw.org/
+		- CMake configure. Install prefix, BUILD_SHARED_LIBS
+		- Build Debug, copy glfw3dll.lib, glfw3.dll, build Release, copy DLL/LIB
+		- Copy include/GLFW
+
+	FBX SDK:
+
+		- Download latest from http://usa.autodesk.com/adsk/servlet/pc/item?siteID=123112&id=10775847
+		- Install
+		- Copy include/, lib/dll for debug/release
+
+	glm:
+
+		- Download latest from http://sourceforge.net/projects/ogl-math/files/
+		- CMake configure, build, install
+		- Copy include/glm/
+
+	jsoncpp:
+
+		- Download latest version from http://sourceforge.net/projects/jsoncpp/
+		- Extract with, e.g. 7-zip
+		- Open makefiles/vs71/jsoncpp.sln
+		- Add an x64 platform
+		- Change to shared library
+		- Define JSON_DLL_BUILD
+		- Build lib_json in debug, copy dll/lib, include/json/

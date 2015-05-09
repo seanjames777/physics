@@ -467,7 +467,7 @@ void Demo::run() {
 
         glfwPollEvents();
 
-        //system->integrate(newTime, elapsed);
+        system->integrate(newTime, elapsed);
 
         double elapsedPhysics = getTime() - newTime;
         physicsTime += elapsedPhysics;
@@ -492,7 +492,7 @@ void Demo::run() {
 
             avgGraphics /= GRAPHICS_FRAMES;
 
-            printf("Graphics: %f\n", avgGraphics * 1000.0);
+            //printf("Graphics: %f\n", avgGraphics * 1000.0);
         }
 
         frameTime += getTime() - newTime;
